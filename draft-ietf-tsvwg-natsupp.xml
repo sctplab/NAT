@@ -1294,7 +1294,7 @@ NAT 1  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
 
 
   INIT-ACK[Initiate-Tag = 5678]
-10.0.0.1:1 &lt;---------100.0.0.1:2
+10.0.0.1:1 <-------- 100.0.0.1:2
             Int-VTag = 1234
 ]]>
 </artwork>
