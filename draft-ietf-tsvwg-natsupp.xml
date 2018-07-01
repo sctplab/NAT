@@ -97,7 +97,8 @@ private addresses to a single public address.
 To date, specialized code for SCTP has not yet been
 added to most NATs so that only true NAT is available.
 The end result of this is that only one SCTP capable host can be
-behind a NAT. The only alternative for supporting legacy NATs is to use
+behind a NAT and this host can only be single-homed.
+The only alternative for supporting legacy NATs is to use
 UDP encapsulation as specified in <xref target='RFC6951'/>.</t>
 <t>This document describes an SCTP specific variant NAT and specific packets
 and procedures to help NATs provide similar features of NAPT in the
