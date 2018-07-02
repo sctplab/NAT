@@ -350,7 +350,8 @@ message flows in this section.</t>
 Priv-Addr:Int-Port ------> Ext-Addr:Ext-Port
                   Ext-VTag=0
 
-             Create(Initiate-Tag, Int-Port, 0, Ext-Port, Priv-Addr, RestartSupported)
+             Create(Initiate-Tag, Int-Port, 0, Ext-Port, Priv-Addr,
+                    RestartSupported)
              Returns(NAT-State control block)
 
            Translate To:
@@ -779,6 +780,8 @@ any other chunk.</t>
 <t>When an SCTP endpoint is behind an SCTP-aware NAT a
 number of problems may arise as it tries to communicate with its peer:
 <list style='symbols'>
+<t>IP addresses can not not be included in the SCTP packet. This is
+discussed in <xref target='setup'/>.</t>
 <t>More than one host behind a NAT may pick the same VTag and source
 port when talking to the same peer server. This creates a situation where
 the NAT will not be able to tell the two associations apart. This situation
@@ -788,15 +791,18 @@ peers are behind the same NAT, then the two endpoints cannot be
 distinguished by the server. This case is discussed in <xref target='collision'/>.</t>
 <t>A restart of a NAT during a conversation could cause a loss of its state.
 This problem and its solution is discussed in <xref target='restart'/>.</t>
+<t>NAT boxes need to deal with SCTP packets being fragmented at the IP layer.
+This is discussed in <xref target='fragmentation'/>.</t>
 <t>An SCTP endpoint may be behind two NATs providing redundancy. The method
-to set up this scenario is discussed in <xref target='multihome'/>.</t>
+to set up this scenario is discussed in <xref target='multihomed'/>.</t>
 </list></t>
 <t>Each of these mechanisms requires additional chunks and parameters,
 defined in this document, and possibly modified handling procedures
 from those specified in <xref target='RFC4960'/>.</t>
 </section>
 
-<section title='Association Setup Considerations'>
+<section anchor='setup'
+         title='Association Setup Considerations'>
 <t>The association setup procedure defined in <xref target='RFC4960'/>
 allows multi-homed SCTP end points to exchange its IP-addresses by using
 IPv4 or IPv6 address parameters in the INIT and INIT-ACK chunks.
@@ -806,7 +812,7 @@ NOT be any IPv4 Address parameter, IPv6 Address parameter, or Supported
 Address Types parameter in the INIT-chunk. The INIT-ACK chunk MUST NOT
 contain any IPv4 Address parameter or IPv6 Address parameter.</t>
 <t>If the association should finally be multi-homed, the procedure in
-<xref target='multihome'/> MUST be used.</t>
+<xref target='multihomed'/> MUST be used.</t>
 <t>The INIT and INIT-ACK chunk SHOULD contain the Disable Restart parameter
 defined in <xref target='disrestart'/>.</t>
 </section>
@@ -900,7 +906,8 @@ MUST be included in the ABORT chunk.</t>
 ERROR chunk with the 'Port Number Collision' error cause MUST be sent back.</t>
 </section>
 
-<section anchor='restart' title='Handling of Missing State'>
+<section anchor='restart'
+         title='Handling of Missing State'>
 <t>If the NAT box receives a packet from the internal network
 for which the lookup procedure does not find an entry in the NAT table,
 a packet containing an ERROR chunk is sent back with the M-bit set.
@@ -962,7 +969,7 @@ packet.</t>
 the dynamic address extension, if it does not discard
 the incoming ERROR chunk.</t>
 <t>If the association is attempting to add an address (i.e. following
-the procedures in <xref target='multihome'/>) then the endpoint MUST-NOT
+the procedures in <xref target='multihomed'/>) then the endpoint MUST-NOT
 consider the address part of the association and SHOULD make no
 further attempt to add the address (i.e. cancel any ASCONF timers and
 remove any record of the path), since the NAT has a VTag collision
@@ -978,7 +985,8 @@ looses its state).</t>
 
 </section>
 
-<section title='Handling of Fragmented SCTP Packets'>
+<section anchor='fragmentation'
+         title='Handling of Fragmented SCTP Packets'>
 <t>A NAT box MUST support IP reassembly of received fragmented
 SCTP packets. The fragments may arrive in any order.</t>
 <t>When an SCTP packet has to be fragmented by the NAT box and
@@ -986,7 +994,8 @@ the IP header forbids fragmentation a corresponding ICMP packet SHOULD
 be sent.</t>
 </section>
 
-<section anchor='multihome' title='Multi-Point Traversal Considerations'>
+<section anchor='multihomed'
+         title='Multi-Point Traversal Considerations'>
 <t>If a multi-homed SCTP endpoint behind a NAT connects to a peer,
 it SHOULD first set up the association single-homed with only one
 address causing the first NAT to populate its state.
@@ -1000,6 +1009,10 @@ optionally the Disable Restart parameter as illustrated above.</t>
 
 <section title='Various Examples of NAT Traversals'>
 <t>Please note that this section is informational only.</t>
+<t>The addresses being used in the following examples are IPv4 addresses
+for private-use networks and for documentation as specified in <xref target='RFC6890'/>.
+However, the method described here is not limited to this NAT44 case.</t>
+
 <section title='Single-homed Client to Single-homed Server'>
 <t>The internal client starts the association with the external
 server via a four-way-handshake. Host A starts by sending an
@@ -1018,7 +1031,7 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        +---------+--------+----------+--------+-----------+
 
    INIT[Initiate-Tag = 1234]
-10.0.0.1:1 ------> 100.0.0.1:2
+10.0.0.1:1 ------> 203.0.113.1:2
         Ext-VTtag = 0
 ]]>
 </artwork>
@@ -1037,7 +1050,7 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        +---------+--------+----------+--------+-----------+
 
                                 INIT[Initiate-Tag = 1234]
-                  101.0.0.1:1 --------------------------> 100.0.0.1:2
+                  192.0.2.1:1 ------------------------> 203.0.113.1:2
                                         Ext-VTtag = 0
 ]]>
 </artwork>
@@ -1054,7 +1067,7 @@ address as destination address.</t>
                                        \--/\---/
 
                                  INIT-ACK[Initiate-Tag = 5678]
-                   101.0.0.1:1 <------------------------- 100.0.0.1:2
+                   192.0.2.1:1 <----------------------- 203.0.113.1:2
                                          Int-VTag = 1234
 
 NAT updates entry:
@@ -1067,7 +1080,7 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
 
 INIT-ACK[Initiate-Tag = 5678]
-10.0.0.1:1 <------ 100.0.0.1:2
+10.0.0.1:1 <------ 203.0.113.1:2
           Int-VTag = 1234
 ]]>
 </artwork>
@@ -1083,20 +1096,20 @@ INIT-ACK[Initiate-Tag = 5678]
                                        \--/\---/
 
          COOKIE-ECHO
-10.0.0.1:1 ------> 100.0.0.1:2
+10.0.0.1:1 ------> 203.0.113.1:2
        Ext-VTag = 5678
 
-                                         COOKIE-ECHO
-                   101.0.0.1:1 -------------------------> 100.0.0.1:2
-                                       Ext-VTag = 5678
+                                      COOKIE-ECHO
+                   192.0.2.1:1 -----------------------> 203.0.113.1:2
+                                    Ext-VTag = 5678
 
 
-                                         COOKIE-ACK
-                   101.0.0.1:1 <------------------------- 100.0.0.1:2
-                                         Int-VTag = 1234
+                                       COOKIE-ACK
+                   192.0.2.1:1 <----------------------- 203.0.113.1:2
+                                    Int-VTag = 1234
 
             COOKIE-ACK
-10.0.0.1:1 <------ 100.0.0.1:2
+10.0.0.1:1 <------ 203.0.113.1:2
            Int-VTag = 1234
 ]]>
 </artwork>
@@ -1125,7 +1138,7 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
 
  INIT[Initiate-Tag = 1234]
-10.0.0.1:1 ---> 100.0.0.1:2
+10.0.0.1:1 ---> 203.0.113.1:2
        Ext-VTag = 0
 ]]>
 </artwork>
@@ -1141,9 +1154,9 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        |  1234   |    1   |     0    |    2   |  10.0.0.1 |
        +---------+--------+----------+--------+-----------+
 
-                               INIT[Initiate-Tag = 1234]
-                101.0.0.1:1 ----------------------------> 100.0.0.1:2
-                                      Ext-VTag = 0
+                             INIT[Initiate-Tag = 1234]
+                192.0.2.1:1 --------------------------> 203.0.113.1:2
+                                  Ext-VTag = 0
 ]]>
 </artwork>
 </figure>
@@ -1160,9 +1173,9 @@ which results in two NAT entries.</t>
 +------+                       \--/\--/      \-|Router 2|-/  +------+
                                                +--------+
 
-                  INIT-ACK[Initiate-tag = 5678, IP-Addr = 100.1.0.1]
-                101.0.0.1:1 <---------------------------- 100.0.0.1:2
-                                    Int-VTag = 1234
+               INIT-ACK[Initiate-tag = 5678, IP-Addr = 203.0.113.129]
+                192.0.2.1:1 <-------------------------- 203.0.113.1:2
+                                 Int-VTag = 1234
 ]]>
 </artwork>
 </figure>
@@ -1179,7 +1192,7 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
 
 INIT-ACK[Initiate-Tag = 5678]
-10.0.0.1:1 <--- 100.0.0.1:2
+10.0.0.1:1 <--- 203.0.113.1:2
          Int-VTag = 1234
 ]]>
 </artwork>
@@ -1197,20 +1210,20 @@ INIT-ACK[Initiate-Tag = 5678]
                                                +--------+
 
        COOKIE-ECHO
-10.0.0.1:1 ---> 100.0.0.1:2
+10.0.0.1:1 ---> 203.0.113.1:2
        ExtVTag = 5678
 
-                                     COOKIE-ECHO
-                101.0.0.1:1 ----------------------------> 100.0.0.1:2
-                                     Ext-VTag = 5678
+                                   COOKIE-ECHO
+                192.0.2.1:1 --------------------------> 203.0.113.1:2
+                                  Ext-VTag = 5678
 
 
                                      COOKIE-ACK
-                101.0.0.1:1 <---------------------------- 100.0.0.1:2
-                                     Int-VTag = 1234
+                192.0.2.1:1 <-------------------------- 203.0.113.1:2
+                                   Int-VTag = 1234
 
           COOKIE-ACK
-10.0.0.1:1 <--- 100.0.0.1:2
+10.0.0.1:1 <--- 203.0.113.1:2
          Int-VTag = 1234
 ]]>
 </artwork>
@@ -1239,7 +1252,7 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        +---------+--------+----------+--------+-----------+
 
  INIT[Initiate-Tag = 1234]
-10.0.0.1:1 --------> 100.0.0.1:2
+10.0.0.1:1 --------> 203.0.113.1:2
          Ext-VTag = 0
 ]]>
 </artwork>
@@ -1257,7 +1270,7 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
 
                                 INIT[Initiate-Tag = 1234]
-                     101.0.0.1:1 -----------------------> 100.0.0.1:2
+                     192.0.2.1:1 ---------------------> 203.0.113.1:2
                                         ExtVTag = 0
 ]]>
 </artwork>
@@ -1275,9 +1288,9 @@ in two NAT entries in NAT 1.</t>
 +------+    \--------| NAT 2 |--------/       \--/\--/
                      +-------+
 
-                   INIT-ACK[Initiate-Tag = 5678, IP-Addr = 100.1.0.1]
-                   101.0.0.1:1 <------------------------- 100.0.0.1:2
-                                      Int-VTag = 1234
+               INIT-ACK[Initiate-Tag = 5678, IP-Addr = 203.0.113.129]
+                   192.0.2.1:1 <----------------------- 203.0.113.1:2
+                                   Int-VTag = 1234
 ]]>
 </artwork>
 </figure>
@@ -1294,7 +1307,7 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
 
   INIT-ACK[Initiate-Tag = 5678]
-10.0.0.1:1 <-------- 100.0.0.1:2
+10.0.0.1:1 <-------- 203.0.113.1:2
             Int-VTag = 1234
 ]]>
 </artwork>
@@ -1312,20 +1325,20 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                      +-------+
 
           COOKIE-ECHO
-10.0.0.1:1 --------> 100.0.0.1:2
+10.0.0.1:1 --------> 203.0.113.1:2
           Ext-VTag = 5678
 
-                                         COOKIE-ECHO
-                        101.0.0.1:1 --------------------> 100.0.0.1:2
-                                         Ext-VTag = 5678
+                                        COOKIE-ECHO
+                        192.0.2.1:1 ------------------> 203.0.113.1:2
+                                      Ext-VTag = 5678
 
 
-                                          COOKIE-ACK
-                        101.0.0.1:1 <-------------------- 100.0.0.1:2
-                                         Int-VTag = 1234
+                                        COOKIE-ACK
+                        192.0.2.1:1 <------------------ 203.0.113.1:2
+                                      Int-VTag = 1234
 
             COOKIE-ACK
-10.0.0.1:1 <------- 100.0.0.1:2
+10.0.0.1:1 <------- 203.0.113.1:2
            Int-VTag = 1234
 ]]>
 </artwork>
@@ -1349,7 +1362,7 @@ its table completely with this single packet.</t>
                      +-------+
 
 ASCONF [ADD-IP=0.0.0.0, INT-VTag=1234, Ext-VTag = 5678]
-10.1.0.1:1 --------> 100.1.0.1:2
+10.1.0.1:1 --------> 203.0.113.129:2
          Ext-VTag = 5678
 ]]>
 </artwork>
@@ -1367,15 +1380,15 @@ NAT 2  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
 
                   ASCONF [ADD-IP,Int-VTag=1234, Ext-VTag = 5678]
-                     101.1.0.1:1 -----------------------> 100.1.0.1:2
+                   192.0.2.129:1 ---------------------> 203.0.113.129:2
                                         Ext-VTag = 5678
 
-                                            ASCONF-ACK
-                     101.1.0.1:1 <----------------------- 100.1.0.1:2
-                                           Int-VTag = 1234
+                                        ASCONF-ACK
+                   192.0.2.129:1 <--------------------- 203.0.113.129:2
+                                     Int-VTag = 1234
 
           ASCONF-ACK
-10.1.0.1:1 <----- 100.1.0.1:2
+10.1.0.1:1 <----- 203.0.113.129:2
          Int-VTag = 1234
 ]]>
 </artwork>
@@ -1402,7 +1415,7 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        +---------+--------+----------+--------+-----------+
 
                DATA
-10.0.0.1:1 ----------> 100.0.0.1:2
+10.0.0.1:1 ----------> 203.0.113.1:2
             Ext-VTag = 5678
 ]]>
 </artwork>
@@ -1419,7 +1432,7 @@ with the M-Bit set and the cause "NAT state missing".</t>
                                          \--/\--/
 
   ERROR [M-Bit, NAT state missing]
-10.0.0.1:1 <---------- 100.0.0.1:2
+10.0.0.1:1 <---------- 203.0.113.1:2
           Ext-VTag = 5678
 ]]>
 </artwork>
@@ -1437,7 +1450,7 @@ actual packet added.</t>
                                          \--/\--/
 
 ASCONF [ADD-IP,DELETE-IP,Int-VTag=1234, Ext-VTag = 5678]
-10.0.0.1:1 ----------> 100.1.0.1:2
+10.0.0.1:1 ----------> 203.0.113.129:2
           Ext-VTag = 5678
 
        +---------+--------+----------+--------+-----------+
@@ -1448,7 +1461,7 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        +---------+--------+----------+--------+-----------+
 
         ASCONF [ADD-IP,DELETE-IP,Int-VTag=1234, Ext-VTag = 5678]
-                       102.1.0.1:1 ---------------------> 100.1.0.1:2
+                       192.0.2.2:1 -------------------> 203.0.113.129:2
                                        Ext-VTag = 5678
 ]]>
 </artwork>
@@ -1464,19 +1477,19 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                                          \--/\--/
 
                                          ASCONF-ACK
-                       102.1.0.1:1 <--------------------- 100.1.0.1:2
+                       192.0.2.2:1 <------------------- 203.0.113.129:2
                                         Int-VTag = 1234
 
                ASCONF-ACK
-10.1.0.1:1 <---------- 100.1.0.1:2
+10.1.0.1:1 <---------- 203.0.113.129:2
           Int-VTag = 1234
 
                DATA
-10.0.0.1:1 ----------> 100.0.0.1:2
+10.0.0.1:1 ----------> 203.0.113.1:2
          Ext-VTag = 5678
-                                            DATA
-                       102.1.0.1:1 ---------------------> 100.1.0.1:2
-                                       Ext-VTag = 5678
+                                          DATA
+                       192.0.2.2:1 -------------------> 203.0.113.129:2
+                                     Ext-VTag = 5678
 ]]>
 </artwork>
 </figure>
@@ -1515,7 +1528,7 @@ NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        +---------+--------+----------+--------+-----------+
 
 INIT[Initiate-Tag = 1234]
-10.0.0.1:1 --> 100.0.0.1:2
+10.0.0.1:1 --> 203.0.113.1:2
         Ext-VTag = 0
 ]]>
 </artwork>
@@ -1532,7 +1545,7 @@ NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        +---------+--------+----------+--------+-----------+
 
                         INIT[Initiate-Tag = 1234]
-               101.0.0.1:1 ----------------> 100.0.0.1:2
+               192.0.2.1:1 ----------------> 203.0.113.1:2
                             Ext-VTag = 0
 ]]>
 </artwork>
@@ -1561,7 +1574,7 @@ are used to create an entry.</t>
                    |          \--/\---/          |
 
                                             INIT[Initiate-Tag = 5678]
-                                           101.0.0.1:1 <-- 10.1.0.1:2
+                                           192.0.2.1:1 <-- 10.1.0.1:2
                                                          Ext-VTag = 0
 
        +---------+--------+-----------+----------+--------+
@@ -1572,7 +1585,7 @@ NAT B  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
        +---------+--------+-----------+----------+--------+
 
                           INIT[Initiate-Tag = 5678]
-               101.0.0.1:1  <--------------- 100.0.0.1:2
+               192.0.2.1:1  <--------------- 203.0.113.1:2
                                   Ext-VTag = 0
 ]]>
 </artwork>
@@ -1599,7 +1612,7 @@ NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        +---------+--------+----------+--------+-----------+
 
  INIT[Initiate-tag = 5678]
-10.0.0.1:1 <-- 100.0.0.1:2
+10.0.0.1:1 <-- 203.0.113.1:2
           Ext-VTag = 0
 ]]>
 </artwork>
@@ -1617,12 +1630,12 @@ NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                    |          \--/\---/          |
 
 INIT-ACK[Initiate-Tag = 1234]
-10.0.0.1:1 --> 100.0.0.1:2
+10.0.0.1:1 --> 203.0.113.1:2
       Ext-VTag = 5678
 
 
                     INIT-ACK[Initiate-Tag = 1234]
-               101.0.0.1:1 ----------------> 100.0.0.1:2
+               192.0.2.1:1 ----------------> 203.0.113.1:2
                              Ext-VTag = 5678
 
                                              NAT B updates entry:
@@ -1635,7 +1648,7 @@ NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        +---------+--------+----------+--------+-----------+
 
                                         INIT-ACK[Initiate-Tag = 1234]
-                                           101.0.0.1:1 --> 10.1.0.1:2
+                                           192.0.2.1:1 --> 10.1.0.1:2
                                                       Ext-VTag = 5678
 ]]>
 </artwork>
@@ -1653,27 +1666,27 @@ NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                    |          \--/\---/          |
 
                                                   COOKIE-ECHO
-                                           101.0.0.1:1 <-- 10.1.0.1:2
+                                           192.0.2.1:1 <-- 10.1.0.1:2
                                                 Ext-VTag = 1234
 
                               COOKIE-ECHO
-               101.0.0.1:1 <------------- 100.0.0.1:2
+               192.0.2.1:1 <------------- 203.0.113.1:2
                               Ext-VTag = 1234
 
        COOKIE-ECHO
-10.0.0.1:1 <-- 100.0.0.1:2
+10.0.0.1:1 <-- 203.0.113.1:2
        Ext-VTag = 1234
 
        COOKIE-ACK
-10.0.0.1:1 --> 100.0.0.1:2
+10.0.0.1:1 --> 203.0.113.1:2
        Ext-VTag = 5678
 
                               COOKIE-ACK
-               101.0.0.1:1 ----------------> 100.0.0.1:2
+               192.0.2.1:1 ----------------> 203.0.113.1:2
                               Ext-VTag = 5678
 
                                                     COOKIE-ACK
-                                           101.0.0.1:1 --> 10.1.0.1:2
+                                           192.0.2.1:1 --> 10.1.0.1:2
                                                  Ext-VTag = 5678
 ]]>
 </artwork>
@@ -1813,7 +1826,7 @@ registry for SCTP:</t>
 Denial Of Service attacks. This document recommends that at
 a minimum a NAT runs a timer on any SCTP state so that old
 association state can be cleaned up.</t>
-<t>For SCTP end-points, this document does not add any additional
+<t>For SCTP end points, this document does not add any additional
 security considerations to the ones given in
 <xref target='RFC4960'/>,
 <xref target='RFC4895'/>, and
