@@ -1825,7 +1825,6 @@ In particular, SCTP is protected by the verification tags and the usage of
 
 <section title='Acknowledgments'>
 <t>The authors wish to thank
-Jason But,
 Gorry Fairhurst,
 Bryan Ford,
 David Hayes,
@@ -1836,6 +1835,8 @@ Timo Voelker,
 Dan Wing,
 and Qiaobing Xie
 for their invaluable comments.</t>
+<t>In addition, the authors wish to thank David Hayes, Jason But, and Grenville Armitage,
+the authors of <xref target='DOI_10.1145_1496091.1496095'/>, for their suggestions.</t>
 </section>
 </middle>
 
@@ -1848,6 +1849,7 @@ for their invaluable comments.</t>
 <?rfc include='reference.RFC.6096' ?>
 </references>
 <references title='Informative References'>
+<?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml-doi/reference.DOI.10.1145/1496091.1496095' ?>
 <?rfc include='reference.RFC.0793' ?>
 <?rfc include='reference.RFC.6458' ?>
 <?rfc include='reference.RFC.6890' ?>
