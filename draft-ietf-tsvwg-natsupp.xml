@@ -315,11 +315,11 @@ later.</t>
 <t>For SCTP packets coming from the public Internet the destination
 address of the packets has to be replaced with the Private-Address
 of the host the packet has to be delivered to. The lookup of the
-Private-Address is based on the External-VTag, External-Port, External-Address,
+Private-Address is based on the External-VTag, External-Port,
 Internal-VTag and the Internal-Port.</t>
 
 <t>For the SCTP NAT processing the NAT box has to maintain a table
-of Internal-VTag, Internal-Port, Private-Address, External-VTag, External-Port
+of Internal-VTag, Internal-Port, External-VTag, External-Port, Private-Address,
 and whether the restart procedure is disabled or not.
 An entry in that table is called a NAT state control block.
 The function Create() obtains the just mentioned parameters and returns
@@ -350,8 +350,8 @@ message flows in this section.</t>
 Priv-Addr:Int-Port ------> Ext-Addr:Ext-Port
                   Ext-VTag=0
 
-                   Create(Initiate-Tag, Int-Port, Priv-Addr, 0)
-                   Returns(NAT-State control block)
+             Create(Initiate-Tag, Int-Port, 0, Ext-Port, Priv-Addr, RestartSupported)
+             Returns(NAT-State control block)
 
            Translate To:
 
@@ -402,8 +402,8 @@ Priv-Addr:Int-Port ------> Ext-Addr:Ext-Port
 
 <t>The processing of incoming SCTP packets containing INIT-ACK chunks
 is described in the following figure. The Lookup() function getting as
-input the Internal-VTag, Internal-Port, External-VTag (=0), External-Port,
-and External-Address, returns the corresponding entry of the NAT table
+input the Internal-VTag, Internal-Port, External-VTag, and External-Port,
+returns the corresponding entry of the NAT table
 and updates the External-VTag by substituting it with the value of the
 Initiate-Tag of the INIT-ACK chunk. The wildcard character signifies that
 the parameter's value is not considered in the Lookup() function
@@ -421,10 +421,10 @@ or changed in the Update() function, respectively.</t>
                             Pub-Addr:Int-Port <---- Ext-Addr:Ext-Port
                                              Int-VTag
 
-         Lookup(Int-VTag, Int-Port, *, 0, Ext-Port)
-         Update(*, *, *, Initiate-Tag, *)
+         Lookup(Int-VTag, Int-Port, *, Ext-Port)
+         Update(*, *, Initiate-Tag, *)
 
-         Returns(NAT-State control block containing Private-Address)
+         Returns(NAT-State control block containing Priv-Addr)
 
                INIT-ACK[Initiate-Tag]
 Priv-Addr:Int-Port <------ Ext-Addr:Ext-Port
@@ -451,9 +451,9 @@ following figure.</t>
                           Pub-Addr:Int-Port <------ Ext-Addr:Ext-Port
                                             Ext-VTag
 
-         Lookup(0, Int-Port, *, Ext-VTag, Ext-Port)
+         Lookup(*, Int-Port, Ext-VTag, Ext-Port)
 
-         Returns(NAT-State control block containing Private-Address)
+         Returns(NAT-State control block containing Priv-Addr)
 
 Priv-Addr:Int-Port <------ Ext-Addr:Ext-Port
                    Ext-VTag
@@ -474,7 +474,7 @@ following figure.</t>
                           Pub-Addr:Int-Port <------ Ext-Addr:Ext-Port
                                             Int-VTag
 
-         Lookup(Int-VTag, Int-Port, *, *, Ext-Port)
+         Lookup(Int-VTag, Int-Port, *, Ext-Port)
 
          Returns(NAT-State control block containing Local-Address)
 
@@ -570,12 +570,11 @@ by a middle box.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
 </figure>
-
 <t><list style="hanging">
 <t hangText="Cause Code: 2 bytes (unsigned integer)">
 <vspace blankLines="0"/>
 This field holds the IANA defined cause code for the
-VTag and Port Number Collision Error Cause.
+'VTag and Port Number Collision' Error Cause.
 The suggested value of this field for IANA is 0x00B0.</t>
 
 <t hangText="Cause Length: 2 bytes (unsigned integer)">
@@ -615,7 +614,7 @@ being sent then the bytes that do not fit are truncated.</t>
 <t hangText="Cause Code: 2 bytes (unsigned integer)">
 <vspace blankLines="0"/>
 This field holds the IANA defined cause code for the
-Missing State Error Cause.
+'Missing State' Error Cause.
 The suggested value of this field for IANA is 0x00B1.</t>
 
 <t hangText="Cause Length: 2 bytes (unsigned integer)">
@@ -645,7 +644,7 @@ being sent then the bytes that do not fit are truncated.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |    Cause Code = 0x00B2        |     Cause Length = Variable   |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-\                             chunk                            /
+\                             Chunk                            /
 /                                                              \
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
@@ -654,7 +653,7 @@ being sent then the bytes that do not fit are truncated.</t>
 <t hangText="Cause Code: 2 bytes (unsigned integer)">
 <vspace blankLines="0"/>
 This field holds the IANA defined cause code for the
-Port Number Collision Error Cause.
+'Port Number Collision' Error Cause.
 The suggested value of this field for IANA is 0x00B2.</t>
 
 <t hangText="Cause Length: 2 bytes (unsigned integer)">
@@ -816,9 +815,9 @@ defined in <xref target='disrestart'/>.</t>
          title='Handling of Internal Port Number and Verification Tag Collisions'>
 
 <t>Consider the case where two hosts in the Private-Address space want to
-set up an SCTP association with the same server running on the same host
-in the Internet. This means that the External-Port and the External-Address
-are the same. If they both choose the same Internal-Port and Internal-VTag, the
+set up an SCTP association with the same service provided by some hosts
+in the Internet. This means that the External-Port is the same.
+If they both choose the same Internal-Port and Internal-VTag, the
 NAT box cannot distinguish between incoming packets anymore. But this is very
 unlikely. The Internal-VTags are chosen at random and if the Internal-Ports are
 also chosen from the ephemeral port range at random this gives a 46-bit
@@ -826,8 +825,8 @@ random number which has to match.
 In the TCP-like NAPT case the NAT box can control the 16-bit Natted Port
 and therefore avoid collisions deterministically.</t>
 
-<t>The same can happen when an INIT-ACK chunk or an ASCONF chunk is
-processed by the NAT.</t>
+<t>The same can happen with the External-VTag when an INIT-ACK chunk or
+an ASCONF chunk is processed by the NAT.</t>
 
 <t>However, in this unlikely event the NAT box MUST send an ABORT
 chunk with the M-bit set if the collision is triggered by an INIT
@@ -912,7 +911,7 @@ Please note that such a packet containing an ERROR chunk SHOULD NOT
 be sent if the received packet contains an ABORT, SHUTDOWN-COMPLETE
 or INIT-ACK chunk. An ERROR chunk MUST NOT be sent if the received
 packet contains an ERROR chunk with the M-bit set.</t>
-<t>When sending the ERROR chunk, the new error cause Missing state
+<t>When sending the ERROR chunk, the new error cause 'Missing State'
 (see <xref target='miss_state'/>) MUST be included and the new M-bit of
 the ERROR chunk MUST be set (see <xref target='mbiterr'/>).</t>
 
@@ -1013,10 +1012,10 @@ INIT chunk.</t>
 | Host A | <------> | NAT | <------> | Internet | <------> | Host B |
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
-       +---------+--------+-----------+----------+--------+
-NAT    |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
 
    INIT[Initiate-Tag = 1234]
 10.0.0.1:1 ------> 100.0.0.1:2
@@ -1030,12 +1029,12 @@ packet is sent on:</t>
 <artwork>
 <![CDATA[
        NAT creates entry:
-       +---------+--------+-----------+----------+--------+
-NAT    |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
-       |  1234   |    1   |  10.0.0.1 |     0    |    2   |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
+       |  1234   |    1   |     0    |    2   |  10.0.0.1 |
+       +---------+--------+----------+--------+-----------+
 
                                 INIT[Initiate-Tag = 1234]
                   101.0.0.1:1 --------------------------> 100.0.0.1:2
@@ -1059,12 +1058,12 @@ address as destination address.</t>
                                          Int-VTag = 1234
 
 NAT updates entry:
-       +---------+--------+-----------+----------+--------+
-NAT    |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
-       |  1234   |    1   |  10.0.0.1 |    5678  |    2   |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
+       |  1234   |    1   |    5678  |    2   |  10.0.0.1 |
+       +---------+--------+----------+--------+-----------+
 
 
 INIT-ACK[Initiate-Tag = 5678]
@@ -1119,10 +1118,10 @@ multi-homed. The client (Host A) sends an INIT like in the single-homed case.
 +------+                       \--/\--/      \-|Router 2|-/  +------+
                                                +--------+
 
-       +---------+--------+-----------+----------+--------+
-NAT    |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
 
 
  INIT[Initiate-Tag = 1234]
@@ -1135,12 +1134,12 @@ NAT    |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
 <figure align='center'>
 <artwork>
 <![CDATA[
-       +---------+--------+-----------+----------+--------+
-NAT    |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
-       |  1234   |    1   |  10.0.0.1 |     0    |    2   |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
+       |  1234   |    1   |     0    |    2   |  10.0.0.1 |
+       +---------+--------+----------+--------+-----------+
 
                                INIT[Initiate-Tag = 1234]
                 101.0.0.1:1 ----------------------------> 100.0.0.1:2
@@ -1171,12 +1170,12 @@ which results in two NAT entries.</t>
 <figure align='center'>
 <artwork>
 <![CDATA[
-       +---------+--------+-----------+----------+--------+
-NAT    |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
-       |  1234   |    1   |  10.0.0.1 |    5678  |    2   |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
+       |  1234   |    1   |    5678  |    2   |  10.0.0.1 |
+       +---------+--------+----------+--------+-----------+
 
 
 INIT-ACK[Initiate-Tag = 5678]
@@ -1234,10 +1233,10 @@ include the second address.</t>
 +------+    \--| NAT 2 |--/       \--/\--/
                +-------+
 
-       +---------+--------+-----------+----------+--------+
-NAT 1  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
 
  INIT[Initiate-Tag = 1234]
 10.0.0.1:1 --------> 100.0.0.1:2
@@ -1249,12 +1248,12 @@ NAT 1  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
 <figure align='center'>
 <artwork>
 <![CDATA[
-       +---------+--------+-----------+----------+--------+
-NAT 1  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
-       |  1234   |    1   |  10.0.0.1 |     0    |    2   |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
+       |  1234   |    1   |     0    |    2   |  10.0.0.1 |
+       +---------+--------+----------+--------+-----------+
 
 
                                 INIT[Initiate-Tag = 1234]
@@ -1286,12 +1285,12 @@ in two NAT entries in NAT 1.</t>
 <figure align='center'>
 <artwork>
 <![CDATA[
-       +---------+--------+-----------+----------+--------+
-NAT 1  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
-       |  1234   |    1   |  10.0.0.1 |    5678  |    2   |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
+       |  1234   |    1   |    5678  |    2   |  10.0.0.1 |
+       +---------+--------+----------+--------+-----------+
 
 
   INIT-ACK[Initiate-Tag = 5678]
@@ -1359,12 +1358,12 @@ ASCONF [ADD-IP=0.0.0.0, INT-VTag=1234, Ext-VTag = 5678]
 <figure align='center'>
 <artwork>
 <![CDATA[
-       +---------+--------+-----------+----------+--------+
-NAT 2  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
-       |  1234   |    1   |  10.1.0.1 |    5678  |    2   |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT 2  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
+       |  1234   |    1   |    5678  |    2   |  10.1.0.1 |
+       +---------+--------+----------+--------+-----------+
 
 
                   ASCONF [ADD-IP,Int-VTag=1234, Ext-VTag = 5678]
@@ -1395,12 +1394,12 @@ to Host B.</t>
 +--------+              +-----+         \        /         +--------+
                                          \--/\--/
 
-       +---------+--------+-----------+----------+--------+
-NAT    |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
-       |  1234   |    1   |  10.0.0.1 |    5678  |    2   |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
+       |  1234   |    1   |    5678  |    2   |  10.0.0.1 |
+       +---------+--------+----------+--------+-----------+
 
                DATA
 10.0.0.1:1 ----------> 100.0.0.1:2
@@ -1441,12 +1440,12 @@ ASCONF [ADD-IP,DELETE-IP,Int-VTag=1234, Ext-VTag = 5678]
 10.0.0.1:1 ----------> 100.1.0.1:2
           Ext-VTag = 5678
 
-       +---------+--------+-----------+----------+--------+
-NAT    |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
-       |  1234   |    1   |  10.0.0.1 |    5678  |    2   |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
+       |  1234   |    1   |    5678  |    2   |  10.0.0.1 |
+       +---------+--------+----------+--------+-----------+
 
         ASCONF [ADD-IP,DELETE-IP,Int-VTag=1234, Ext-VTag = 5678]
                        102.1.0.1:1 ---------------------> 100.1.0.1:2
@@ -1505,15 +1504,15 @@ sending peer's point of view.</t>
 
 
 NAT-Tables
-       +---------+--------+-----------+----------+--------+
-NAT A  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
 
-       +---------+--------+-----------+----------+--------+
-NAT B  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  v-tag  |  port  |    addr   |   v-tag  |   port |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  v-tag  |  port  |   v-tag  |   port |    Addr   |
+       +---------+--------+----------+--------+-----------+
 
 INIT[Initiate-Tag = 1234]
 10.0.0.1:1 --> 100.0.0.1:2
@@ -1525,12 +1524,12 @@ INIT[Initiate-Tag = 1234]
 <figure align='center'>
 <artwork>
 <![CDATA[
-       +---------+--------+-----------+----------+--------+
-NAT A  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
-       |  1234   |    1   |  10.0.0.1 |     0    |    2   |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
+       |  1234   |    1   |     0    |    2   |  10.0.0.1 |
+       +---------+--------+----------+--------+-----------+
 
                         INIT[Initiate-Tag = 1234]
                101.0.0.1:1 ----------------> 100.0.0.1:2
@@ -1542,10 +1541,10 @@ NAT A  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
 silently discarded and leaves the NAT table of NAT B unchanged.</t>
 <figure align='center'>
 <artwork>
-       +---------+--------+-----------+----------+--------+
-NAT B  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
 </artwork>
 </figure>
 <t>Now Host B sends INIT, which is processed by NAT B. Its parameters
@@ -1592,12 +1591,12 @@ an entry, the entry is found and updated:</t>
                    |          \--/\---/          |
 
                VTag != Int-VTag, but Ext-VTag == 0, find entry.
-       +---------+--------+-----------+----------+--------+
-NAT A  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
-       |   1234  |   1    |  10.0.0.1 |   5678   |    2   |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
+       |   1234  |   1    |   5678   |    2   |  10.0.0.1 |
+       +---------+--------+----------+--------+-----------+
 
  INIT[Initiate-tag = 5678]
 10.0.0.1:1 <-- 100.0.0.1:2
@@ -1628,12 +1627,12 @@ INIT-ACK[Initiate-Tag = 1234]
 
                                              NAT B updates entry:
 
-       +---------+--------+-----------+----------+--------+
-NAT B  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
-       |  5678   |    2   |  10.1.0.1 |   1234   |   1    |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
+       |  5678   |    2   |   1234   |   1    |  10.1.0.1 |
+       +---------+--------+----------+--------+-----------+
 
                                         INIT-ACK[Initiate-Tag = 1234]
                                            101.0.0.1:1 --> 10.1.0.1:2
