@@ -6,7 +6,7 @@
 
 <rfc category='std'
      ipr='trust200902'
-     docName='draft-ietf-tsvwg-natsupp-15-to-be'>
+     docName='draft-ietf-tsvwg-natsupp-15'>
 
 <front>
 <title abbrev='SCTP NAT Support'>
@@ -72,7 +72,7 @@ This additional code is sometimes classified as Network Address and Port
 Translation (NAPT).</t>
 <t>This document describes the protocol extensions required for the SCTP
 endpoints and the mechanisms for NAT devices necessary to provide similar
-features of NAPT in the single-point and multi-point traversal scenario.</t>
+features of NAPT in the single point and multi point traversal scenario.</t>
 </abstract>
 </front>
 
@@ -88,8 +88,8 @@ single globally unique IPv4 address, even when two hosts
 (behind a NAT) choose the same port numbers for their connection.
 This additional code is sometimes classified as Network Address and Port
 Translation (NAPT).
-Please note that this document focuses on the case where the NAT maps multiple
-private addresses to a single public address.
+Please note that this document focuses on the case where the NAT maps a single
+or multiple private addresses to a single public address and vice versa.
 To date, specialized code for SCTP has not yet been
 added to most NAT devices so that only a translation of IP addresses is
 supported.
@@ -207,7 +207,7 @@ when sending packets towards the External-Address.</t>
 <section title='Motivation'>
 <section title='SCTP NAT Traversal Scenarios'>
 <t>This section defines the notion of single and
-multi-point NAT traversal. </t>
+multi point NAT traversal. </t>
 <section title='Single Point Traversal'>
 
 <t>In this case, all packets in the SCTP association go through a
@@ -244,8 +244,8 @@ single path:</t>
 </figure>
 
 <t>Although one of the main benefits of SCTP multi-homing is redundant
-paths, In this single point traversal scenario the NAT function represents
-a single point of failure in the path of the SCTP multi-home association.
+paths, in the single point traversal scenario the NAT function represents
+a single point of failure in the path of the SCTP multi-homed association.
 However, the rest of the path may still benefit from path diversity provided
 by SCTP multi-homing.</t>
 
@@ -341,7 +341,7 @@ In this case there must be no more than one entry with the same Internal-Port,
 External-Port and Ext-VTag and no more than one NAT binding table entry with
 the same Internal-Port, External-Port and Int-VTag.</t>
 
-<t>The processing of outgoing SCTP packets containing an INIT-chunk
+<t>The processing of outgoing SCTP packets containing an INIT chunk
 is described in the following figure. The scenario shown is valid for all
 message flows in this section.</t>
 <figure align='center'>
@@ -372,7 +372,7 @@ Priv-Addr:Int-Port ------> Ext-Addr:Ext-Port
 </figure>
 <t>Normally a NAT binding table entry will be created.</t>
 <t>However, it is possible that there is already a NAT binding table entry with the
-same External-Address, External-Port, Internal-Port, and Internal-VTag
+same External-Port, Internal-Port, and Internal-VTag
 but different Private-Address.
 In this case the INIT MUST be dropped by the NAT and an ABORT MUST be
 sent back to the SCTP host with the M-Bit set and an appropriate error
@@ -380,13 +380,12 @@ cause (see <xref target='mbitabort'/> for the format).
 The source address of the packet containing the ABORT chunk MUST be the
 destination address of the packet containing the INIT chunk.</t>
 <t>It is also possible that a connection to External-Address and External-Port
-exists without an Internal-VTag conflict but the External-Address does not
-support the DISABLE_RESTART feature (noted in the NAT binding table entry
-when the prior connection was established).
-In such a case the INIT SHOULD be dropped by the NAT and an ABORT SHOULD be
+exists without an Internal-VTag conflict but there exists a NAT binding
+table entry with the same port numbers but a different Private-Address.
+In such a case the INIT MUST be dropped by the NAT and an ABORT SHOULD be
 sent back to the SCTP host with the M-Bit set and an appropriate error
 cause (see <xref target='mbitabort'/> for the format).</t>
-<t>The processing of outgoing SCTP packets containing no INIT-chunk
+<t>The processing of outgoing SCTP packets containing no INIT chunks
 is described in the following figure.</t>
 <figure align='center'>
 <artwork>
@@ -409,12 +408,12 @@ Priv-Addr:Int-Port ------> Ext-Addr:Ext-Port
 </artwork>
 </figure>
 
-<t>The processing of incoming SCTP packets containing INIT-ACK chunks
+<t>The processing of incoming SCTP packets containing an INIT ACK chunk
 is described in the following figure. The Lookup() function getting as
 input the Internal-VTag, Internal-Port, External-VTag, and External-Port,
 returns the corresponding entry of the NAT binding table
 and updates the External-VTag by substituting it with the value of the
-Initiate-Tag of the INIT-ACK chunk. The wildcard character signifies that
+Initiate-Tag of the INIT ACK chunk. The wildcard character signifies that
 the parameter's value is not considered in the Lookup() function
 or changed in the Update() function, respectively.</t>
 <figure align='center'>
@@ -426,7 +425,7 @@ or changed in the Update() function, respectively.</t>
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
 
-                                         INIT-ACK[Initiate-Tag]
+                                         INIT ACK[Initiate-Tag]
                             Pub-Addr:Int-Port <---- Ext-Addr:Ext-Port
                                              Int-VTag
 
@@ -435,18 +434,18 @@ or changed in the Update() function, respectively.</t>
 
          Returns(NAT-State control block containing Priv-Addr)
 
-               INIT-ACK[Initiate-Tag]
+               INIT ACK[Initiate-Tag]
 Priv-Addr:Int-Port <------ Ext-Addr:Ext-Port
                    Int-VTag
 ]]>
 </artwork>
 </figure>
-<t>In the case Lookup fails, the SCTP packet is dropped. The Update routine
-inserts the External-VTag (the Initiate-Tag of the INIT-ACK chunk)
-in the NAT state control block.</t>
+<t>In the case Lookup fails, the SCTP packet is dropped.
+If it succeeds, the Update routine inserts the External-VTag
+(the Initiate-Tag of the INIT ACK chunk) in the NAT state control block.</t>
 
 <t>The processing of incoming SCTP packets containing an ABORT or
-SHUTDOWN-COMPLETE chunk with the T-Bit set is described in the
+SHUTDOWN COMPLETE chunk with the T-Bit set is described in the
 following figure.</t>
 <figure align='center'>
 <artwork>
@@ -469,6 +468,11 @@ Priv-Addr:Int-Port <------ Ext-Addr:Ext-Port
 ]]>
 </artwork>
 </figure>
+<t>For an incoming packet containing an INIT chunk a table lookup is made
+only based on the addresses and port numbers.
+If an entry with an External-VTag of zero is found, it is considered a
+match and the External-VTag is updated.
+This allows the handling of INIT collision through NAT.</t>
 <t>The processing of other incoming SCTP packets is described in the
 following figure.</t>
 <figure align='center'>
@@ -485,19 +489,13 @@ following figure.</t>
 
          Lookup(Int-VTag, Int-Port, *, Ext-Port)
 
-         Returns(NAT-State control block containing Local-Address)
+         Returns(NAT-State control block containing Private-Address)
 
 Priv-Addr:Int-Port <------ Ext-Addr:Ext-Port
                    Int-VTag
 ]]>
 </artwork>
 </figure>
-
-<t>For an incoming packet containing an INIT-chunk a table lookup is made
-only based on the addresses and port numbers.
-If an entry with an External-VTag of zero is found, it is considered a
-match and the External-VTag is updated.
-This allows the handling of INIT-collision through NAT.</t>
 </section>
 </section>
 
@@ -594,7 +592,7 @@ The value MUST be the length of the Cause-Specific Information plus 4.</t>
 <t hangText="Chunk: variable length">
 <vspace blankLines="0"/>
 The Cause-Specific Information is filled with the chunk that caused this error.
-This can be an INIT, INIT-ACK, or ASCONF chunk.
+This can be an INIT, INIT ACK, or ASCONF chunk.
 Note that if the entire chunk will not fit in the ERROR chunk or ABORT chunk
 being sent then the bytes that do not fit are truncated.</t>
 </list></t>
@@ -673,7 +671,7 @@ The value MUST be the length of the Cause-Specific Information plus 4.</t>
 <t hangText="Chunk: variable length">
 <vspace blankLines="0"/>
 The Cause-Specific Information is filled with the chunk that caused this error.
-This can be an INIT, INIT-ACK, or ASCONF chunk.
+This can be an INIT, INIT ACK, or ASCONF chunk.
 Note that if the entire chunk will not fit in the ERROR chunk or ABORT chunk
 being sent then the bytes that do not fit are truncated.</t>
 </list></t>
@@ -689,9 +687,9 @@ being sent then the bytes that do not fit are truncated.</t>
 <t>This section defines new parameters and their valid appearance
 defined by this document.</t>
 <section anchor='disrestart' title='Disable Restart Parameter' >
-<t>This parameter is used to indicate that the RESTART procedure
+<t>This parameter is used to indicate that the restart procedure
 is requested to be disabled. Both endpoints of an association MUST
-include this parameter in the INIT chunk and INIT-ACK chunk when
+include this parameter in the INIT chunk and INIT ACK chunk when
 establishing an association and MUST include it in the ASCONF chunk
 when adding an address to successfully disable the restart procedure.</t>
 <figure align='center'>
@@ -719,7 +717,7 @@ This field holds the length in bytes of the parameter. The value MUST be 4.</t>
 <t>Assignment of parameter type to be confirmed by IANA.</t>
 </list>
 ]</t>
-<t>This parameter MAY appear in INIT, INIT-ACK and ASCONF chunks and
+<t>This parameter MAY appear in INIT, INIT ACK and ASCONF chunks and
 MUST NOT appear in any other chunk.</t>
 </section>
 
@@ -756,8 +754,8 @@ This field holds the length in bytes of the parameter. The value MUST be 16.</t>
 This is an opaque integer assigned by the sender to identify each
 request parameter. The receiver of the ASCONF Chunk will copy this
 32-bit value into the ASCONF Response Correlation ID field of the
-ASCONF-ACK response parameter. The sender of the ASCONF can use this
-same value in the ASCONF-ACK to find which request the response is
+ASCONF ACK response parameter. The sender of the ASCONF can use this
+same value in the ASCONF ACK to find which request the response is
 for. Note that the receiver MUST NOT change this 32-bit value.</t>
 
 <t hangText="Internal Verification Tag: 4 bytes (unsigned integer)">
@@ -812,15 +810,19 @@ from those specified in <xref target='RFC4960'/>.</t>
          title='Association Setup Considerations for Endpoints'>
 <t>The association setup procedure defined in <xref target='RFC4960'/>
 allows multi-homed SCTP endpoints to exchange its IP-addresses by using
-IPv4 or IPv6 address parameters in the INIT and INIT-ACK chunks.
+IPv4 or IPv6 address parameters in the INIT and INIT ACK chunks.
 However, this doesn't work when NAT devices are present.</t>
-<t>Every association MUST initially be set up single-homed. There MUST
-NOT be any IPv4 Address parameter, IPv6 Address parameter, or Supported
-Address Types parameter in the INIT-chunk. The INIT-ACK chunk MUST NOT
-contain any IPv4 Address parameter or IPv6 Address parameter.</t>
+<t>Every association setup from a host behind a NAT MUST NOT use multiple
+private addresses.
+There MUST NOT be any IPv4 Address parameter, IPv6 Address parameter, or Supported
+Address Types parameter in the INIT chunk. The INIT ACK chunk MUST NOT
+contain any IPv4 Address parameter or IPv6 Address parameter using non-global
+addresses.
+The INIT chunk and the INIT ACK chunk MUST NOT contain any Host Name
+parameters.</t>
 <t>If the association should finally be multi-homed, the procedure in
 <xref target='multihomed'/> MUST be used.</t>
-<t>The INIT and INIT-ACK chunk SHOULD contain the Disable Restart parameter
+<t>The INIT and INIT ACK chunk SHOULD contain the Disable Restart parameter
 defined in <xref target='disrestart'/>.</t>
 </section>
 
@@ -839,22 +841,22 @@ random number that has to match.
 A NAPT device can control the 16-bit Natted Port and therefore avoid collisions
 deterministically.</t>
 
-<t>The same can happen with the External-VTag when an INIT-ACK chunk or
+<t>The same can happen with the External-VTag when an INIT ACK chunk or
 an ASCONF chunk is processed by the NAT.</t>
 
 <section title='NAT Device Considerations'>
 <t>If the NAT device detects a collision of internal port numbers and
 verification tags, it MUST send an ABORT chunk with the M-bit set if the
-collision is triggered by an INIT or INIT-ACK chunk.
+collision is triggered by an INIT or INIT ACK chunk.
 If such a collision is triggered by an ASCONF chunk, it MUST send an
 ERROR chunk with the M-bit.
 The M-bit is a new bit defined by this document to express to
 SCTP that the source of this packet is a "middle" box, not the
 peer SCTP endpoint (see <xref target="mbitabort"/>).
-If a packet containing an INIT-ACK chunk triggers the collision,
+If a packet containing an INIT ACK chunk triggers the collision,
 the corresponding packet containing the ABORT chunk MUST contain the same
 source and destination address and port numbers as the packet containing
-the INIT-ACK chunk. In the other two cases, the source and destination address
+the INIT ACK chunk. In the other two cases, the source and destination address
 and port numbers MUST be swapped.</t>
 <t>The sender of the ERROR or ABORT chunk MUST include the error cause
 with cause code 'VTag and Port Number Collision'
@@ -863,9 +865,9 @@ with cause code 'VTag and Port Number Collision'
 
 <section title='Endpoint Considerations'>
 <t>The sender of the packet containing the INIT chunk or the receiver
-of the INIT-ACK chunk, upon reception of an ABORT chunk with M-bit set
+of the INIT ACK chunk, upon reception of an ABORT chunk with M-bit set
 and the appropriate error cause code for colliding NAT binding table state is included,
-MUST reinitiate the association setup procedure after choosing a new initiate
+SHOULD reinitiate the association setup procedure after choosing a new initiate
 tag, if the association is in COOKIE-WAIT state. In any other state, the
 SCTP endpoint MUST NOT respond.</t>
 
@@ -879,23 +881,26 @@ M-bit set, MUST stop adding the path to the association.</t>
 <t>When two SCTP hosts are behind an SCTP-aware NAT it is possible that two
 SCTP hosts in the Private-Address space will want to set up an
 SCTP association with the same server running on the same host in the Internet.
-For the NAT, appropriate tracking may be performed by assuring that the
+If the two hosts choose the same internal port, this is considered an
+internal port number collision.</t>
+<t>For the NAT, appropriate tracking may be performed by assuring that the
 VTags are unique between the two hosts.</t>
 <section title='NAT Device Considerations'>
-<t>The NAT, when processing the INIT-ACK, should note in its NAT binding table that
-the association supports the Disable Restart extension.
+<t>The NAT, when processing the INIT ACK, should note in its NAT binding table that
+the association supports the disable restart extension.
 This note is used when establishing future associations (i.e. when processing
 an INIT from an internal host) to decide if the connection should be allowed.
 The NAT device does the following when processing an INIT:
 <list style='symbols'>
-<t>If the INIT is destined to an external address and port for which
-the NAT device has no outbound connection, it MUST allow the INIT creating an
-NAT binding table entry.</t>
-<t>If the INIT matches the external address and port of an already
-existing connection, it MUST validate that the external server supports the
-Disable Restart feature and, if it does, allow the INIT to be forwarded.</t>
-<t>If the external server does not support the Disable Restart
-extension the NAT device MUST send an ABORT with the M-bit set.</t>
+<t>If the INIT is originating from an internal port to an external port for
+which the NAT device has no matching NAT binding table entry,
+it MUST allow the INIT creating an NAT binding table
+entry.</t>
+<t>If the INIT matches an existing NAT binding table entry, it MUST validate
+that the disable restart feature is supported and, if it does, allow the INIT
+to be forwarded.</t>
+<t>If the disable restart feature is not supported, the NAT device MUST send
+an ABORT with the M-bit set.</t>
 </list></t>
 <t>The 'Port Number Collision' error cause (see <xref target='portcollide' />)
 MUST be included in the ABORT chunk sent in response to the INIT chunk.</t>
@@ -910,12 +915,12 @@ If they both have chosen the same Internal-Port the server cannot distinguish
 between both associations based on the address and port numbers.
 For the server it looks like the association is being restarted.
 To overcome this limitation the client sends a Disable Restart parameter in
-the INIT-chunk.</t>
+the INIT chunk.</t>
 <t>When the server receives this parameter it does the following:
 <list style='symbols'>
-<t>It MUST include a Disable Restart parameter in the INIT-ACK to
+<t>It MUST include a Disable Restart parameter in the INIT ACK to
 inform the client that it will support the feature.</t>
-<t>It MUST Disable the restart procedures defined in <xref target='RFC4960'/>
+<t>It MUST disable the restart procedures defined in <xref target='RFC4960'/>
 for this association.</t>
 </list></t>
 <t>Servers that support this feature will need to be capable of maintaining
@@ -934,9 +939,10 @@ The source address of the packet containing the ERROR chunk MUST
 be the destination address of the incoming SCTP packet.
 The verification tag is reflected and the T-bit is set.
 Such a packet containing an ERROR chunk SHOULD NOT
-be sent if the received packet contains an ABORT, SHUTDOWN-COMPLETE
-or INIT-ACK chunk. An ERROR chunk MUST NOT be sent if the received
-packet contains an ERROR chunk with the M-bit set.</t>
+be sent if the received packet contains an ABORT, SHUTDOWN COMPLETE
+or INIT ACK chunk. An ERROR chunk MUST NOT be sent if the received
+packet contains an ERROR chunk with the M-bit set.
+In any case, the packet SHOULD NOT be forwarded to the external address.</t>
 <t>When sending the ERROR chunk, the error cause 'Missing State'
 (see <xref target='miss_state'/>) MUST be included and the M-bit of
 the ERROR chunk MUST be set (see <xref target='mbiterr'/>).</t>
@@ -958,7 +964,8 @@ the dynamic address extension.
 If the validation fails, discard the incoming ERROR chunk.</t>
 <t>It SHOULD generate a new ASCONF chunk containing the VTags parameter
 (see <xref target='vtags-parameter'/>) and the Disable Restart
-parameter if the association is using the disabled restart feature.
+parameter (see <xref target='disrestart'/>) if the association is using the
+disable restart feature.
 By processing this packet the NAT device can recover the appropriate state.
 The procedures for generating an ASCONF chunk can be found in
 <xref target='RFC5061'/>.</t>
@@ -968,7 +975,7 @@ add the address and respond with an acknowledgment, if the address is
 new to the association (following all procedures defined in
 <xref target='RFC5061'/>).
 Or, if the address is already part of the association, the SCTP endpoint
-MUST NOT respond with an error, but instead SHOULD respond with an ASCONF-ACK
+MUST NOT respond with an error, but instead SHOULD respond with an ASCONF ACK
 chunk acknowledging the address and take no action (since the address is
 already in the association).</t>
 <t>Note that it is possible that upon receiving an ASCONF chunk containing
@@ -1016,14 +1023,14 @@ be sent.</t>
 </section>
 
 <section anchor='multihomed'
-         title='Multi-Point Traversal Considerations for Endpoints'>
+         title='Multi Point Traversal Considerations for Endpoints'>
 <t>If a multi-homed SCTP endpoint behind a NAT connects to a peer,
-it SHOULD first set up the association single-homed with only one
+it MUST first set up the association single-homed with only one
 address causing the first NAT to populate its state.
 Then it SHOULD add each IP address using ASCONF chunks sent via
 their respective NAT devices. The address to add is the wildcard address
 and the lookup address SHOULD also contain the VTags parameter and
-optionally the Disable Restart parameter as illustrated above.</t>
+optionally the Disable Restart parameter.</t>
 </section>
 
 </section>
@@ -1033,7 +1040,9 @@ optionally the Disable Restart parameter as illustrated above.</t>
 <t>The addresses being used in the following examples are IPv4 addresses
 for private-use networks and for documentation as specified in <xref target='RFC6890'/>.
 However, the method described here is not limited to this NAT44 case.</t>
-
+<t>The NAT binding table entries shown in the following examples do not
+include the flag indicating whether the restart procedure is supported or not.
+This flag is not relevant for these examples.</t>
 <section title='Single-homed Client to Single-homed Server'>
 <t>The internal client starts the association with the external
 server via a four-way-handshake. Host A starts by sending an
@@ -1057,7 +1066,7 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 ]]>
 </artwork>
 </figure>
-<t>A NAT entry is created, the source address is substituted and the
+<t>A NAT binding tabled entry is created, the source address is substituted and the
 packet is sent on:</t>
 <figure align='center'>
 <artwork>
@@ -1076,7 +1085,7 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 ]]>
 </artwork>
 </figure>
-<t>Host B receives the INIT and sends an INIT-ACK with the NAT's external
+<t>Host B receives the INIT and sends an INIT ACK with the NAT's external
 address as destination address.</t>
 <figure align='center'>
 <artwork>
@@ -1087,7 +1096,7 @@ address as destination address.</t>
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
 
-                                 INIT-ACK[Initiate-Tag = 5678]
+                                 INIT ACK[Initiate-Tag = 5678]
                    192.0.2.1:1 <----------------------- 203.0.113.1:2
                                          Int-VTag = 1234
 
@@ -1100,13 +1109,13 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        +---------+--------+----------+--------+-----------+
 
 
-INIT-ACK[Initiate-Tag = 5678]
+INIT ACK[Initiate-Tag = 5678]
 10.0.0.1:1 <------ 203.0.113.1:2
           Int-VTag = 1234
 ]]>
 </artwork>
 </figure>
-<t>The handshake finishes with a COOKIE-ECHO acknowledged by a COOKIE-ACK.</t>
+<t>The handshake finishes with a COOKIE ECHO acknowledged by a COOKIE ACK.</t>
 <figure align='center'>
 <artwork>
 <![CDATA[
@@ -1116,20 +1125,20 @@ INIT-ACK[Initiate-Tag = 5678]
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
 
-         COOKIE-ECHO
+         COOKIE ECHO
 10.0.0.1:1 ------> 203.0.113.1:2
        Ext-VTag = 5678
 
-                                      COOKIE-ECHO
+                                      COOKIE ECHO
                    192.0.2.1:1 -----------------------> 203.0.113.1:2
                                     Ext-VTag = 5678
 
 
-                                       COOKIE-ACK
+                                       COOKIE ACK
                    192.0.2.1:1 <----------------------- 203.0.113.1:2
                                     Int-VTag = 1234
 
-            COOKIE-ACK
+            COOKIE ACK
 10.0.0.1:1 <------ 203.0.113.1:2
            Int-VTag = 1234
 ]]>
@@ -1181,8 +1190,7 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 ]]>
 </artwork>
 </figure>
-<t>The server (Host B) includes its two addresses in the INIT-ACK chunk,
-which results in two NAT entries.</t>
+<t>The server (Host B) includes its two addresses in the INIT ACK chunk.</t>
 <figure align='center'>
 <artwork>
 <![CDATA[
@@ -1194,13 +1202,13 @@ which results in two NAT entries.</t>
 +------+                       \--/\--/      \-|Router 2|-/  +------+
                                                +--------+
 
-               INIT-ACK[Initiate-tag = 5678, IP-Addr = 203.0.113.129]
+               INIT ACK[Initiate-tag = 5678, IP-Addr = 203.0.113.129]
                 192.0.2.1:1 <-------------------------- 203.0.113.1:2
                                  Int-VTag = 1234
 ]]>
 </artwork>
 </figure>
-<t>NAT does need to change the NAT binding table for the second address:</t>
+<t>NAT does not need to change the NAT binding table for the second address:</t>
 <figure align='center'>
 <artwork>
 <![CDATA[
@@ -1212,13 +1220,13 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        +---------+--------+----------+--------+-----------+
 
 
-INIT-ACK[Initiate-Tag = 5678]
+INIT ACK[Initiate-Tag = 5678]
 10.0.0.1:1 <--- 203.0.113.1:2
          Int-VTag = 1234
 ]]>
 </artwork>
 </figure>
-<t>The handshake finishes with a COOKIE-ECHO acknowledged by a COOKIE-ACK.</t>
+<t>The handshake finishes with a COOKIE ECHO acknowledged by a COOKIE ACK.</t>
 <figure align='center'>
 <artwork>
 <![CDATA[
@@ -1230,20 +1238,20 @@ INIT-ACK[Initiate-Tag = 5678]
 +------+                       \--/\--/      \-|Router 2|-/  +------+
                                                +--------+
 
-       COOKIE-ECHO
+       COOKIE ECHO
 10.0.0.1:1 ---> 203.0.113.1:2
        ExtVTag = 5678
 
-                                   COOKIE-ECHO
+                                   COOKIE ECHO
                 192.0.2.1:1 --------------------------> 203.0.113.1:2
                                   Ext-VTag = 5678
 
 
-                                     COOKIE-ACK
+                                     COOKIE ACK
                 192.0.2.1:1 <-------------------------- 203.0.113.1:2
                                    Int-VTag = 1234
 
-          COOKIE-ACK
+          COOKIE ACK
 10.0.0.1:1 <--- 203.0.113.1:2
          Int-VTag = 1234
 ]]>
@@ -1296,8 +1304,7 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 ]]>
 </artwork>
 </figure>
-<t>Host B includes its second address in the INIT-ACK, which results
-in two NAT entries in NAT 1.</t>
+<t>Host B includes its second address in the INIT ACK.</t>
 <figure align='center'>
 <artwork>
 <![CDATA[
@@ -1309,7 +1316,7 @@ in two NAT entries in NAT 1.</t>
 +------+    \--------| NAT 2 |--------/       \--/\--/
                      +-------+
 
-               INIT-ACK[Initiate-Tag = 5678, IP-Addr = 203.0.113.129]
+               INIT ACK[Initiate-Tag = 5678, IP-Addr = 203.0.113.129]
                    192.0.2.1:1 <----------------------- 203.0.113.1:2
                                    Int-VTag = 1234
 ]]>
@@ -1327,13 +1334,13 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        +---------+--------+----------+--------+-----------+
 
 
-  INIT-ACK[Initiate-Tag = 5678]
+  INIT ACK[Initiate-Tag = 5678]
 10.0.0.1:1 <-------- 203.0.113.1:2
             Int-VTag = 1234
 ]]>
 </artwork>
 </figure>
-<t>The handshake finishes with a COOKIE-ECHO acknowledged by a COOKIE-ACK.</t>
+<t>The handshake finishes with a COOKIE ECHO acknowledged by a COOKIE ACK.</t>
 <figure align='center'>
 <artwork>
 <![CDATA[
@@ -1345,20 +1352,20 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 +------+    \--------| NAT 2 |--------/       \--/\--/
                      +-------+
 
-          COOKIE-ECHO
+          COOKIE ECHO
 10.0.0.1:1 --------> 203.0.113.1:2
           Ext-VTag = 5678
 
-                                        COOKIE-ECHO
+                                        COOKIE ECHO
                         192.0.2.1:1 ------------------> 203.0.113.1:2
                                       Ext-VTag = 5678
 
 
-                                        COOKIE-ACK
+                                        COOKIE ACK
                         192.0.2.1:1 <------------------ 203.0.113.1:2
                                       Int-VTag = 1234
 
-            COOKIE-ACK
+            COOKIE ACK
 10.0.0.1:1 <------- 203.0.113.1:2
            Int-VTag = 1234
 ]]>
@@ -1404,11 +1411,11 @@ NAT 2  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                    192.0.2.129:1 ---------------------> 203.0.113.129:2
                                         Ext-VTag = 5678
 
-                                        ASCONF-ACK
+                                        ASCONF ACK
                    192.0.2.129:1 <--------------------- 203.0.113.129:2
                                      Int-VTag = 1234
 
-          ASCONF-ACK
+          ASCONF ACK
 10.1.0.1:1 <----- 203.0.113.129:2
          Int-VTag = 1234
 ]]>
@@ -1431,8 +1438,6 @@ to Host B.</t>
        +---------+--------+----------+--------+-----------+
 NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
-       +---------+--------+----------+--------+-----------+
-       |  1234   |    1   |    5678  |    2   |  10.0.0.1 |
        +---------+--------+----------+--------+-----------+
 
                DATA
@@ -1499,11 +1504,11 @@ all other addresses from this association.</t>
 +--------+              +-----+         \        /         +--------+
                                          \--/\--/
 
-                                         ASCONF-ACK
+                                         ASCONF ACK
                        192.0.2.2:1 <------------------- 203.0.113.129:2
                                         Int-VTag = 1234
 
-            ASCONF-ACK
+            ASCONF ACK
 10.1.0.1:1 <---------- 203.0.113.129:2
           Int-VTag = 1234
 
@@ -1641,7 +1646,7 @@ NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 ]]>
 </artwork>
 </figure>
-<t>Host A sends INIT-ACK, which can pass through NAT B:</t>
+<t>Host A sends INIT ACK, which can pass through NAT B:</t>
 <figure align='center'>
 <artwork>
 <![CDATA[
@@ -1653,12 +1658,12 @@ NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 +--------+     +-------+     \         /     +-------+     +--------+
                    |          \--/\---/          |
 
-INIT-ACK[Initiate-Tag = 1234]
+INIT ACK[Initiate-Tag = 1234]
 10.0.0.1:1 --> 203.0.113.1:2
       Ext-VTag = 5678
 
 
-                    INIT-ACK[Initiate-Tag = 1234]
+                    INIT ACK[Initiate-Tag = 1234]
                192.0.2.1:1 ----------------> 203.0.113.1:2
                              Ext-VTag = 5678
 
@@ -1671,13 +1676,13 @@ NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        |  5678   |    2   |   1234   |   1    |  10.1.0.1 |
        +---------+--------+----------+--------+-----------+
 
-                                        INIT-ACK[Initiate-Tag = 1234]
+                                        INIT ACK[Initiate-Tag = 1234]
                                            192.0.2.1:1 --> 10.1.0.1:2
                                                       Ext-VTag = 5678
 ]]>
 </artwork>
 </figure>
-<t>The lookup for COOKIE-ECHO and COOKIE-ACK is successful.</t>
+<t>The lookup for COOKIE ECHO and COOKIE ACK is successful.</t>
 <figure align='center'>
 <artwork>
 <![CDATA[
@@ -1689,27 +1694,27 @@ NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 +--------+     +-------+     \         /     +-------+     +--------+
                    |          \--/\---/          |
 
-                                                  COOKIE-ECHO
+                                                  COOKIE ECHO
                                            192.0.2.1:1 <-- 10.1.0.1:2
                                                 Ext-VTag = 1234
 
-                              COOKIE-ECHO
+                              COOKIE ECHO
                192.0.2.1:1 <------------- 203.0.113.1:2
                               Ext-VTag = 1234
 
-       COOKIE-ECHO
+       COOKIE ECHO
 10.0.0.1:1 <-- 203.0.113.1:2
        Ext-VTag = 1234
 
-       COOKIE-ACK
+       COOKIE ACK
 10.0.0.1:1 --> 203.0.113.1:2
        Ext-VTag = 5678
 
-                              COOKIE-ACK
+                              COOKIE ACK
                192.0.2.1:1 ----------------> 203.0.113.1:2
                               Ext-VTag = 5678
 
-                                                    COOKIE-ACK
+                                                    COOKIE ACK
                                            192.0.2.1:1 --> 10.1.0.1:2
                                                  Ext-VTag = 5678
 ]]>
@@ -1867,6 +1872,7 @@ David Hayes,
 Alfred Hines,
 Karen E. E. Nielsen,
 Henning Peters,
+Maksim Proshin,
 Timo Voelker,
 Dan Wing,
 and Qiaobing Xie
