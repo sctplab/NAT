@@ -12,7 +12,6 @@
 * ToDo:
 *
 * Address Maxims comments from 19.11.2019 on TSVWG
-* Address Mohameds comments from 19.11.2019 in private e-mail
 * change to xmlv3
 -->
 <front>
@@ -72,7 +71,7 @@ communications channel between two end-hosts in many ways similar to the
 Transmission Control Protocol (TCP).
 With the widespread deployment of Network Address Translators (NAT),
 specialized code has been added to NAT for TCP that allows multiple hosts
-to reside behind a NAT and yet use only a single globally unique IPv4 address,
+to reside behind a NAT and yet share a single IPv4 address,
 even when two hosts (behind a NAT) choose the same port numbers for their
 connection.
 This additional code is sometimes classified as Network Address and Port
@@ -91,9 +90,9 @@ provides a reliable communications channel between two end-hosts in many
 ways similar to TCP <xref target='RFC0793'/>. With the widespread
 deployment of Network Address Translators (NAT), specialized code has been
 added to NAT for TCP that allows multiple hosts to reside behind a NAT
-using private addresses (see <xref target='RFC6890'/>) and yet use only a
-single globally unique IPv4 address, even when two hosts
-(behind a NAT) choose the same port numbers for their connection.
+using private addresses (see <xref target='RFC6890'/>) and yet share
+single IPv4 address, even when two hosts (behind a NAT) choose the same port
+numbers for their connection.
 This additional code is sometimes classified as Network Address and Port
 Translation (NAPT).
 Please note that this document focuses on the case where the NAT maps a single
@@ -119,7 +118,7 @@ without the NAT needing to change port numbers.</t>
 to share a NAT's public IP address in the same way that a TCP session can use a
 NAT.</t>
 <t>If a NAT does not need to change any data within an SCTP packet it
-will reduce the processing burden of NAT'ing SCTP by NOT
+will reduce the processing burden of NAT'ing SCTP by not
 needing to execute the CRC32c checksum required by SCTP.</t>
 <t>Not having to touch the IP payload makes the processing of ICMP
 messages in NAT devices easier.</t>
@@ -284,8 +283,8 @@ An example is shown below:</t>
 </artwork>
 </figure>
 
-<t>This case does NOT apply to a single-homed SCTP association (i.e.,
-BOTH endpoints in the association use only one IP address). The
+<t>This case does not apply to a single-homed SCTP association (i.e.,
+both endpoints in the association use only one IP address). The
 advantage here is that the existence of multiple NAT traversal points
 can preserve the path diversity of a multi-homed association for the
 entire path. This in turn can improve the robustness of the
@@ -310,9 +309,9 @@ perform port number translation in a consistent way.
 One possible way of doing this is to use a pre-defined table of ports and
 addresses configured within each NAT.
 Other mechanisms could make use of NAT to NAT communication.
-Such mechanisms have not been deployabled on a wide scale base and thus are not
+Such mechanisms have not been deployed on a wide scale base and thus are not
 a recommended solution.
-Therefore the SCTP variant of NAT has been developed.</t>
+Therefore an SCTP variant of NAT has been developed.</t>
 </section>
 
 <section title='The SCTP-Specific Variant of NAT'>
@@ -321,7 +320,7 @@ Therefore the SCTP variant of NAT has been developed.</t>
 behind a NAT that has one Public-Address. Furthermore this section
 focuses on the single point traversal scenario.</t>
 
-<t>The modification of SCTP packets sent to the public Internet is
+<t>The modification of SCTP packets sent to the Internet is
 simple: the source address of the packet has to be replaced with the
 Public-Address. It may also be necessary to establish some
 state in the NAT device to later handle incoming packets.</t>
@@ -793,7 +792,7 @@ any other chunk.</t>
 <t>When an SCTP endpoint is behind an SCTP-aware NAT a
 number of problems may arise as it tries to communicate with its peer:
 <list style='symbols'>
-<t>IP addresses can not not be included in the SCTP packet. This is
+<t>IP addresses can not be included in the SCTP packet. This is
 discussed in <xref target='setup'/>.</t>
 <t>More than one host behind a NAT device could select the same VTag and source
 port when talking to the same peer server. This creates a situation where
@@ -1007,7 +1006,7 @@ MUST discard the incoming ERROR chunk.</t>
 the procedures in <xref target='multihomed'/>) then the endpoint MUST NOT
 consider the address part of the association and SHOULD make no
 further attempt to add the address (i.e. cancel any ASCONF timers and
-remove any record of the path), since the NAT devie has a VTag collision
+remove any record of the path), since the NAT device has a VTag collision
 and the association cannot easily create a new VTag (as it would if
 the error occurred when sending an INIT).</t>
 <t>If the endpoint has no other path, i.e. the procedure was executed
@@ -1216,7 +1215,8 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 ]]>
 </artwork>
 </figure>
-<t>NAT does not need to change the NAT binding table for the second address:</t>
+<t>The NAT device does not need to change the NAT binding table for the second
+address:</t>
 <figure align='center'>
 <artwork>
 <![CDATA[
@@ -2053,6 +2053,8 @@ assigned by IANA (<xref target="RFC3688" />):</t>
 Denial Of Service attacks. This document recommends that at
 a minimum a NAT runs a timer on any SCTP state so that old
 association state can be cleaned up.</t>
+<t>Generic issues related to address sharing are discussed in
+<xref target='RFC6269' /> and apply to SCTP as well.</t>
 <t>For SCTP endpoints, this document does not add any additional
 security considerations to the ones given in
 <xref target='RFC4960'/>,
@@ -2127,6 +2129,7 @@ text related to the YANG module.</t>
 <references title='Informative References'>
 <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml-doi/reference.DOI.10.1145/1496091.1496095' ?>
 <?rfc include='reference.RFC.0793' ?>
+<?rfc include='reference.RFC.6269' ?>
 <?rfc include='reference.RFC.6458' ?>
 <?rfc include='reference.RFC.6890' ?>
 <?rfc include='reference.RFC.6951' ?>
