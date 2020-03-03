@@ -1731,42 +1731,6 @@ NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 </section>
 </section>
 
-<section title='Socket API Considerations'>
-<t>This section describes how the socket API defined in
-<xref target='RFC6458'/> is extended to provide a way for the
-application to control NAT friendliness.</t>
-<t>Please note that this section is informational only.</t>
-
-<t>A socket API implementation based on <xref target='RFC6458'/>
-is extended by supporting one new read/write socket option.</t>
-
-<section title='Get or Set the NAT Friendliness
-                (SCTP_NAT_FRIENDLY)'>
-<t>This socket option uses the option_level IPPROTO_SCTP and the
-option_name SCTP_NAT_FRIENDLY. It can be used to enable/disable the
-NAT friendliness for future associations and retrieve the value
-for future and specific ones.</t>
-<figure>
-<artwork>
-struct sctp_assoc_value {
-  sctp_assoc_t assoc_id;
-  uint32_t assoc_value;
-};
-</artwork>
-</figure>
-<t>
-<list style='hanging'>
-<t hangText="assoc_id:">
-This parameter is ignored for one-to-one style sockets.
-For one-to-many style sockets the application may fill in an association
-identifier or SCTP_FUTURE_ASSOC for this query.
-It is an error to use SCTP_{CURRENT|ALL}_ASSOC in assoc_id.</t>
-<t hangText="assoc_value:">
-A non-zero value indicates a NAT-friendly mode.</t>
-</list></t>
-</section>
-</section>
-
 <section title="SCTP NAT YANG Module">
 <t>This section defines a YANG module for SCTP NAT.</t>
 <t>The terminology for describing YANG data models is defined
@@ -1923,6 +1887,42 @@ module ietf-nat-sctp {
 ]]>
 </artwork>
 </figure>
+</section>
+</section>
+
+<section title='Socket API Considerations'>
+<t>This section describes how the socket API defined in
+<xref target='RFC6458'/> is extended to provide a way for the
+application to control NAT friendliness.</t>
+<t>Please note that this section is informational only.</t>
+
+<t>A socket API implementation based on <xref target='RFC6458'/>
+is extended by supporting one new read/write socket option.</t>
+
+<section title='Get or Set the NAT Friendliness
+                (SCTP_NAT_FRIENDLY)'>
+<t>This socket option uses the option_level IPPROTO_SCTP and the
+option_name SCTP_NAT_FRIENDLY. It can be used to enable/disable the
+NAT friendliness for future associations and retrieve the value
+for future and specific ones.</t>
+<figure>
+<artwork>
+struct sctp_assoc_value {
+  sctp_assoc_t assoc_id;
+  uint32_t assoc_value;
+};
+</artwork>
+</figure>
+<t>
+<list style='hanging'>
+<t hangText="assoc_id:">
+This parameter is ignored for one-to-one style sockets.
+For one-to-many style sockets the application may fill in an association
+identifier or SCTP_FUTURE_ASSOC for this query.
+It is an error to use SCTP_{CURRENT|ALL}_ASSOC in assoc_id.</t>
+<t hangText="assoc_value:">
+A non-zero value indicates a NAT-friendly mode.</t>
+</list></t>
 </section>
 </section>
 
