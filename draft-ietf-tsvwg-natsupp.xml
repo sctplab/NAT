@@ -1,23 +1,28 @@
-<?xml version='1.0'?>
-<!DOCTYPE rfc SYSTEM 'rfc2629.dtd'>
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE rfc SYSTEM "rfc2629-xhtml.ent">
 <?rfc toc='yes'?>
 <?rfc compact='yes'?>
 <?rfc subcompact='no'?>
 
-<rfc category='std'
-     ipr='trust200902'
-     docName='draft-ietf-tsvwg-natsupp-16-to-be'>
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude"
+     xml:lang="en"
+     ipr="trust200902"
+     submissionType="IETF"
+     consensus="true"
+     category="std"
+     docName="draft-ietf-tsvwg-natsupp-16-to-be"
+     version="3">
 
 <!--
 * ToDo:
 *
 * Address Maxims comments from 19.11.2019 on TSVWG
-* change to xmlv3
 -->
 <front>
 <title abbrev='SCTP NAT Support'>
 Stream Control Transmission Protocol (SCTP) Network Address Translation Support
 </title>
+<seriesInfo name="Internet-Draft" value="draft-ietf-tsvwg-natsupp-16-to-be"/>
 
 <!-- ************** RANDALL STEWART ***************-->
 <author initials='R. R.' surname='Stewart' fullname='Randall R. Stewart'>
@@ -34,7 +39,7 @@ Stream Control Transmission Protocol (SCTP) Network Address Translation Support
 </author>
 
 <!-- ************** MICHAEL TUEXEN *************** -->
-<author initials='M.' surname='Tuexen' fullname='Michael Tuexen'>
+<author initials='M.' surname='Tüxen' asciiSurname='Tuexen' fullname='Michael Tüxen' asciiFullname='Michael Tuexen'>
     <organization abbrev='Muenster Univ. of Appl. Sciences'>
                   Muenster University of Applied Sciences</organization>
     <address>
@@ -84,7 +89,8 @@ features of NAPT in the single point and multi point traversal scenario.</t>
 </front>
 
 <middle>
-<section title='Introduction'>
+<section>
+<name>Introduction</name>
 <t>Stream Control Transmission Protocol <xref target='RFC4960'/>
 provides a reliable communications channel between two end-hosts in many
 ways similar to TCP <xref target='RFC0793'/>. With the widespread
@@ -112,17 +118,18 @@ of SCTP endpoint procedures to support NAT traversal.
 An SCTP implementation supporting these procedures can assure that in both
 single-homed and multi-homed cases a NAT will maintain the appropriate state
 without the NAT needing to change port numbers.</t>
-<t>It is possible and desirable to make these changes for a number of reasons:
-<list style='symbols'>
-<t>It is desirable for SCTP internal end-hosts on multiple platforms to be able
+<t>It is possible and desirable to make these changes for a number of
+reasons:</t>
+<ul>
+<li>It is desirable for SCTP internal end-hosts on multiple platforms to be able
 to share a NAT's public IP address in the same way that a TCP session can use a
-NAT.</t>
-<t>If a NAT does not need to change any data within an SCTP packet it
+NAT.</li>
+<li><t>If a NAT does not need to change any data within an SCTP packet it
 will reduce the processing burden of NAT'ing SCTP by not
-needing to execute the CRC32c checksum required by SCTP.</t>
-<t>Not having to touch the IP payload makes the processing of ICMP
-messages in NAT devices easier.</t>
-</list></t>
+needing to execute the CRC32c checksum required by SCTP.</t></li>
+<li><t>Not having to touch the IP payload makes the processing of ICMP
+messages in NAT devices easier.</t></li>
+</ul>
 <t>An SCTP-aware NAT will need to follow these procedures for generating
 appropriate SCTP packet formats.</t>
 <t>When considering this feature it is possible to have
@@ -131,21 +138,22 @@ Host, External Host and NAT may or may not support the
 features described in this document. The following table
 illustrates the results of the various combinations of
 support and if communications can occur between two endpoints.</t>
-<texttable anchor='communication_table'
-           title='Communication possibilities'>
-<ttcol align='center'>Internal Host</ttcol>
-<ttcol align='center'>NAT Device</ttcol>
-<ttcol align='center'>External Host</ttcol>
-<ttcol align='center'>Communication</ttcol>
-<c>Support</c>    <c>Support</c>    <c>Support</c>    <c>Yes</c>
-<c>Support</c>    <c>Support</c>    <c>No Support</c> <c>Limited</c>
-<c>Support</c>    <c>No Support</c> <c>Support</c>    <c>None</c>
-<c>Support</c>    <c>No Support</c> <c>No Support</c> <c>None</c>
-<c>No Support</c> <c>Support</c>    <c>Support</c>    <c>Limited</c>
-<c>No Support</c> <c>Support</c>    <c>No Support</c> <c>Limited</c>
-<c>No Support</c> <c>No Support</c> <c>Support</c>    <c>None</c>
-<c>No Support</c> <c>No Support</c> <c>No Support</c> <c>None</c>
-</texttable>
+<table anchor="communication_table" align="center">
+<name>Communication possibilities</name>
+<thead>
+<tr><th align="center">Internal Host</th> <th align="center">NAT Device</th> <th align="center">External Host</th> <th align="center">Communication</th></tr>
+</thead>
+<tbody>
+<tr><td align="center">Support      </td> <td align="center">Support   </td> <td align="center">Support      </td> <td align="center">Yes          </td></tr>
+<tr><td align="center">Support      </td> <td align="center">Support   </td> <td align="center">No Support   </td> <td align="center">Limited      </td></tr>
+<tr><td align="center">Support      </td> <td align="center">No Support</td> <td align="center">Support      </td> <td align="center">None         </td></tr>
+<tr><td align="center">Support      </td> <td align="center">No Support</td> <td align="center">No Support   </td> <td align="center">None         </td></tr>
+<tr><td align="center">No Support   </td> <td align="center">Support   </td> <td align="center">Support      </td> <td align="center">Limited      </td></tr>
+<tr><td align="center">No Support   </td> <td align="center">Support   </td> <td align="center">No Support   </td> <td align="center">Limited      </td></tr>
+<tr><td align="center">No Support   </td> <td align="center">No Support</td> <td align="center">Support      </td> <td align="center">None         </td></tr>
+<tr><td align="center">No Support   </td> <td align="center">No Support</td> <td align="center">No Support   </td> <td align="center">None         </td></tr>
+</tbody>
+</table>
 <t>From the table it can be seen that when a NAT device does not support the
 extension no communication can occur.
 This assumes that the NAT device does not handle SCTP packets at all and
@@ -158,7 +166,8 @@ For example only one host may be able to have a connection when a collision
 case occurs.</t>
 </section>
 
-<section anchor='conventions' title='Conventions'>
+<section anchor='conventions'>
+<name>Conventions</name>
 <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
 "OPTIONAL" in this document are to be interpreted as described in
@@ -166,37 +175,39 @@ BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/>  when,
 and only when, they appear in all capitals, as shown here.</t>
 </section>
 
-<section anchor='terminology' title='Terminology'>
+<section anchor='terminology'>
+<name>Terminology</name>
 <t>This document uses the following terms, which are depicted in
 <xref target='terminology_fig'/>. Familiarity with the terminology used in
-<xref target='RFC4960'/> and <xref target='RFC5061'/> is assumed.
-<list style='hanging'>
-<t hangText="Private-Address (Priv-Addr):">
-The private address that is known to the internal host.</t>
-<t hangText="Internal-Port (Int-Port):">
-The port number that is in use by the host holding the Private-Address.</t>
-<t hangText="Internal-VTag (Int-VTag):">
-The SCTP Verification Tag (VTag) (see Section 3.1 of <xref target='RFC4960'/>)
-that the internal host has chosen for its communication.
+<xref target='RFC4960'/> and <xref target='RFC5061'/> is assumed.</t>
+<dl>
+<dt>Private-Address (Priv-Addr)</dt>
+<dd><t>The private address that is known to the internal host.</t></dd>
+<dt>Internal-Port (Int-Port)</dt>
+<dd><t>The port number that is in use by the host holding the
+Private-Address.</t></dd>
+<dt>Internal-VTag (Int-VTag)</dt>
+<dd><t>The SCTP Verification Tag (VTag) (see Section 3.1 of
+<xref target='RFC4960'/>) that the internal host has chosen for its
+communication.
 The VTag is a unique 32-bit tag that must accompany any incoming SCTP packet
-for this association to the Private-Address.</t>
-<t hangText="External-Address (Ext-Addr):">
-The address that an internal host is attempting to contact.</t>
-<t hangText="External-Port (Ext-Port):">
-The port number of the peer process at the External-Address.</t>
-<t hangText="External-VTag (Ext-VTag):">
-The Verification Tag that the host holding the External-Address has
+for this association to the Private-Address.</t></dd>
+<dt>External-Address (Ext-Addr)</dt>
+<dd><t>The address that an internal host is attempting to contact.</t></dd>
+<dt>External-Port (Ext-Port)</dt>
+<dd><t>The port number of the peer process at the External-Address.</t></dd>
+<dt>External-VTag (Ext-VTag)</dt>
+<dd><t>The Verification Tag that the host holding the External-Address has
 chosen for its communication.
 The VTag is a unique 32-bit tag that must accompany any incoming
-SCTP packet for this association to the External-Address.</t>
-<t hangText="Public-Address (Pub-Addr):">
-The public address assigned to the NAT device that it uses as a source address
-when sending packets towards the External-Address.</t>
-</list></t>
-<figure anchor='terminology_fig'
-        title='Basic network setup'
-        align='center'>
-<artwork>
+SCTP packet for this association to the External-Address.</t></dd>
+<dt>Public-Address (Pub-Addr)</dt>
+<dd><t>The public address assigned to the NAT device that it uses as a source
+address when sending packets towards the External-Address.</t></dd>
+</dl>
+<figure anchor='terminology_fig'>
+<name>Basic network setup</name>
+<artwork align="center">
   Internal Network    |         External Network
                       |
            Private    |   Public               External
@@ -211,17 +222,20 @@ when sending packets towards the External-Address.</t>
 </figure>
 </section>
 
-<section title='Motivation'>
-<section title='SCTP NAT Traversal Scenarios'>
+<section>
+<name>Motivation</name>
+<section>
+<name>SCTP NAT Traversal Scenarios</name>
 <t>This section defines the notion of single and
 multi point NAT traversal. </t>
-<section title='Single Point Traversal'>
+<section>
+<name>Single Point Traversal</name>
 
 <t>In this case, all packets in the SCTP association go through a
 single NAT, as shown below:</t>
-<figure title='Single NAT scenario'
-        align='center'>
-<artwork>
+<figure>
+<name>Single NAT scenario</name>
+<artwork align="center">
 
   Internal Network    |       External Network
                       |
@@ -236,9 +250,9 @@ single NAT, as shown below:</t>
 
 <t>A variation of this case is shown below, i.e., multiple NAT devices in a
 single path:</t>
-<figure title='Serial NAT Devices scenario'
-        align='center'>
-<artwork>
+<figure>
+<name>Serial NAT Devices scenario</name>
+<artwork align="center">
       Internal | External : Internal | External
                |          :          |
 +--------+     |          :          |       /--\/--\    +--------+
@@ -260,15 +274,16 @@ by SCTP multi-homing.</t>
 multi-homed. However, the important thing is that the NAT device
 (or NAT devices) in this case sees all the packets of the SCTP association.</t>
 
-</section> <!-- title='Single Point Travers'-->
+</section>
 
-<section title='Multi Point Traversal'>
+<section>
+<name>Multi Point Traversal</name>
 <t>This case involves multiple NAT devices and each NAT device only sees some
 of the packets in the SCTP association.
 An example is shown below:</t>
-<figure title='Parallel NAT devices scenario'
-        align='center'>
-<artwork>
+<figure>
+<name>Parallel NAT devices scenario</name>
+<artwork align="center">
 
          Internal      |      External
                     +------+             /---\/---\
@@ -292,7 +307,8 @@ communication.</t>
 </section>
 </section>
 
-<section title='Limitations of Classical NAPT for SCTP'>
+<section>
+<name>Limitations of Classical NAPT for SCTP</name>
 <t>Using classical NAPT may result in changing one of the SCTP port numbers
 during the processing which requires the recomputation of the transport layer
 checksum by the NAPT device.
@@ -314,8 +330,8 @@ a recommended solution.
 Therefore an SCTP variant of NAT has been developed.</t>
 </section>
 
-<section title='The SCTP-Specific Variant of NAT'>
-
+<section>
+<name>The SCTP-Specific Variant of NAT</name>
 <t>In this section it is allowed that there are multiple SCTP capable hosts
 behind a NAT that has one Public-Address. Furthermore this section
 focuses on the single point traversal scenario.</t>
@@ -351,8 +367,7 @@ the same Internal-Port, External-Port and Int-VTag.</t>
 <t>The processing of outgoing SCTP packets containing an INIT chunk
 is described in the following figure. The scenario shown is valid for all
 message flows in this section.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
@@ -376,7 +391,6 @@ Priv-Addr:Int-Port ------> Ext-Addr:Ext-Port
                             Ext-VTag=0
 ]]>
 </artwork>
-</figure>
 <t>Normally a NAT binding table entry will be created.</t>
 <t>However, it is possible that there is already a NAT binding table entry with the
 same External-Port, Internal-Port, and Internal-VTag
@@ -394,8 +408,7 @@ sent back to the SCTP host with the M-Bit set and an appropriate error
 cause (see <xref target='mbitabort'/> for the format).</t>
 <t>The processing of outgoing SCTP packets containing no INIT chunks
 is described in the following figure.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
@@ -413,7 +426,6 @@ Priv-Addr:Int-Port ------> Ext-Addr:Ext-Port
                                            Ext-VTag
 ]]>
 </artwork>
-</figure>
 
 <t>The processing of incoming SCTP packets containing an INIT ACK chunk
 is described in the following figure. The Lookup() function getting as
@@ -423,8 +435,7 @@ and updates the External-VTag by substituting it with the value of the
 Initiate-Tag of the INIT ACK chunk. The wildcard character signifies that
 the parameter's value is not considered in the Lookup() function
 or changed in the Update() function, respectively.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
@@ -446,7 +457,6 @@ Priv-Addr:Int-Port <------ Ext-Addr:Ext-Port
                    Int-VTag
 ]]>
 </artwork>
-</figure>
 <t>In the case Lookup fails, the SCTP packet is dropped.
 If it succeeds, the Update routine inserts the External-VTag
 (the Initiate-Tag of the INIT ACK chunk) in the NAT state control block.</t>
@@ -454,8 +464,7 @@ If it succeeds, the Update routine inserts the External-VTag
 <t>The processing of incoming SCTP packets containing an ABORT or
 SHUTDOWN COMPLETE chunk with the T-Bit set is described in the
 following figure.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
@@ -474,7 +483,6 @@ Priv-Addr:Int-Port <------ Ext-Addr:Ext-Port
                    Ext-VTag
 ]]>
 </artwork>
-</figure>
 <t>For an incoming packet containing an INIT chunk a table lookup is made
 only based on the addresses and port numbers.
 If an entry with an External-VTag of zero is found, it is considered a
@@ -482,8 +490,7 @@ match and the External-VTag is updated.
 This allows the handling of INIT collision through NAT.</t>
 <t>The processing of other incoming SCTP packets is described in the
 following figure.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
@@ -502,23 +509,23 @@ Priv-Addr:Int-Port <------ Ext-Addr:Ext-Port
                    Int-VTag
 ]]>
 </artwork>
-</figure>
 </section>
 </section>
 
-<section title='Data Formats'>
+<section>
+<name>Data Formats</name>
 <t>This section defines the formats used to support NAT traversal.
 <xref target='chunks'/> and <xref target='errcause'/> describe chunks
 and error causes sent by NAT devices and received by SCTP endpoints.
 <xref target='newparam'/> describes parameters sent by SCTP endpoints and
 used by NAT devices and SCTP endpoints.</t>
-<section anchor='chunks' title='Modified Chunks'>
+<section anchor='chunks'>
+<name>Modified Chunks</name>
 <t>This section presents existing chunks defined in <xref target='RFC4960'/>
 that are modified by this document.</t>
-<section anchor='mbitabort' title='Extended ABORT Chunk'>
-<t>
-<figure align='center'>
-<artwork>
+<section anchor='mbitabort'>
+<name>Extended ABORT Chunk</name>
+<artwork align="left">
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -529,22 +536,15 @@ that are modified by this document.</t>
 \                                                               \
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
-</figure>
-</t>
-<t>
-The ABORT chunk is extended to add the new 'M-bit'. The M-bit
+<t>The ABORT chunk is extended to add the new 'M-bit'. The M-bit
 indicates to the receiver of the ABORT chunk that the chunk was not
 generated by the peer SCTP endpoint, but instead by a middle box.</t>
-<t>[NOTE to RFC-Editor:
-<list>
-<t>Assignment of M-bit to be confirmed by IANA.</t>
-</list>
-]</t>
+<t>[NOTE to RFC-Editor: Assignment of M-bit to be confirmed by IANA.]</t>
 </section>
 
-<section anchor='mbiterr' title='Extended ERROR Chunk'>
-<figure align='center'>
-<artwork>
+<section anchor='mbiterr'>
+<name>Extended ERROR Chunk</name>
+<artwork align="left">
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -555,25 +555,21 @@ generated by the peer SCTP endpoint, but instead by a middle box.</t>
 \                                                               \
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
-</figure>
 <t>The ERROR chunk defined in <xref target='RFC4960'/> is extended to
 add the new 'M-bit'. The M-bit indicates to the receiver of the ERROR chunk
 that the chunk was not generated by the peer SCTP endpoint, but instead
 by a middle box.</t>
-<t>[NOTE to RFC-Editor:
-<list>
-<t>Assignment of M-bit to be confirmed by IANA.</t>
-</list>
-]</t>
+<t>[NOTE to RFC-Editor: Assignment of M-bit to be confirmed by IANA.]</t>
 </section>
 </section>
 
-<section anchor='errcause' title='New Error Causes'>
+<section anchor='errcause'>
+<name>New Error Causes</name>
 <t>This section defines the new error causes added by this document.</t>
 
-<section anchor='port_coll' title='VTag and Port Number Collision Error Cause'>
-<figure align='center'>
-<artwork>
+<section anchor='port_coll'>
+<name>VTag and Port Number Collision Error Cause</name>
+<artwork align="left">
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -583,36 +579,27 @@ by a middle box.</t>
 /                                                              \
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
-</figure>
-<t><list style="hanging">
-<t hangText="Cause Code: 2 bytes (unsigned integer)">
-<vspace blankLines="0"/>
-This field holds the IANA defined cause code for the
+<dl>
+<dt>Cause Code: 2 bytes (unsigned integer)</dt>
+<dd><t>This field holds the IANA defined cause code for the
 'VTag and Port Number Collision' Error Cause.
-IANA is requested to assign the value 0x00B0 for this cause code.</t>
-
-<t hangText="Cause Length: 2 bytes (unsigned integer)">
-<vspace blankLines="0"/>
-This field holds the length in bytes of the error cause.
-The value MUST be the length of the Cause-Specific Information plus 4.</t>
-
-<t hangText="Chunk: variable length">
-<vspace blankLines="0"/>
-The Cause-Specific Information is filled with the chunk that caused this error.
+IANA is requested to assign the value 0x00B0 for this cause code.</t></dd>
+<dt>Cause Length: 2 bytes (unsigned integer)</dt>
+<dd><t>This field holds the length in bytes of the error cause.
+The value MUST be the length of the Cause-Specific Information plus 4.</t></dd>
+<dt>Chunk: variable length</dt>
+<dd><t>The Cause-Specific Information is filled with the chunk that caused this
+error.
 This can be an INIT, INIT ACK, or ASCONF chunk.
 Note that if the entire chunk will not fit in the ERROR chunk or ABORT chunk
-being sent then the bytes that do not fit are truncated.</t>
-</list></t>
-<t>[NOTE to RFC-Editor:
-<list>
-<t>Assignment of cause code to be confirmed by IANA.</t>
-</list>
-]</t>
+being sent then the bytes that do not fit are truncated.</t></dd>
+</dl>
+<t>[NOTE to RFC-Editor: Assignment of cause code to be confirmed by IANA.]</t>
 </section>
 
-<section anchor='miss_state' title='Missing State Error Cause'>
-<figure align='center'>
-<artwork>
+<section anchor='miss_state'>
+<name>Missing State Error Cause</name>
+<artwork align="left">
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -622,37 +609,26 @@ being sent then the bytes that do not fit are truncated.</t>
 /                                                              \
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
-</figure>
-
-<t><list style="hanging">
-<t hangText="Cause Code: 2 bytes (unsigned integer)">
-<vspace blankLines="0"/>
-This field holds the IANA defined cause code for the
+<dl>
+<dt>Cause Code: 2 bytes (unsigned integer)</dt>
+<dd><t>This field holds the IANA defined cause code for the
 'Missing State' Error Cause.
-IANA is requested to assign the value 0x00B1 for this cause code.</t>
-
-<t hangText="Cause Length: 2 bytes (unsigned integer)">
-<vspace blankLines="0"/>
-This field holds the length in bytes of the error cause.
-The value MUST be the length of the Cause-Specific Information plus 4.</t>
-
-<t hangText="Incoming Packet: variable length">
-<vspace blankLines="0"/>
-The Cause-Specific Information is filled with the IPv4 or IPv6 packet that
+IANA is requested to assign the value 0x00B1 for this cause code.</t></dd>
+<dt>Cause Length: 2 bytes (unsigned integer)</dt>
+<dd><t>This field holds the length in bytes of the error cause.
+The value MUST be the length of the Cause-Specific Information plus 4.</t></dd>
+<dt>Incoming Packet: variable length</dt>
+<dd><t>The Cause-Specific Information is filled with the IPv4 or IPv6 packet that
 caused this error. The IPv4 or IPv6 header MUST be included.
 Note that if the packet will not fit in the ERROR chunk or ABORT chunk
-being sent then the bytes that do not fit are truncated.</t>
-</list></t>
-<t>[NOTE to RFC-Editor:
-<list>
-<t>Assignment of cause code to be confirmed by IANA.</t>
-</list>
-]</t>
+being sent then the bytes that do not fit are truncated.</t></dd>
+</dl>
+<t>[NOTE to RFC-Editor: Assignment of cause code to be confirmed by IANA.]</t>
 </section>
 
-<section anchor='portcollide' title='Port Number Collision Error Cause'>
-<figure align='center'>
-<artwork>
+<section anchor='portcollide'>
+<name>Port Number Collision Error Cause</name>
+<artwork align="left">
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -662,76 +638,61 @@ being sent then the bytes that do not fit are truncated.</t>
 /                                                              \
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
-</figure>
-<t><list style="hanging">
-<t hangText="Cause Code: 2 bytes (unsigned integer)">
-<vspace blankLines="0"/>
-This field holds the IANA defined cause code for the
+<dl>
+<dt>Cause Code: 2 bytes (unsigned integer)</dt>
+<dd><t>This field holds the IANA defined cause code for the
 'Port Number Collision' Error Cause.
-IANA is requested to assign the value 0x00B2 for this cause code.</t>
-
-<t hangText="Cause Length: 2 bytes (unsigned integer)">
-<vspace blankLines="0"/>
-This field holds the length in bytes of the error cause.
-The value MUST be the length of the Cause-Specific Information plus 4.</t>
-
-<t hangText="Chunk: variable length">
-<vspace blankLines="0"/>
-The Cause-Specific Information is filled with the chunk that caused this error.
+IANA is requested to assign the value 0x00B2 for this cause code.</t></dd>
+<dt>Cause Length: 2 bytes (unsigned integer)</dt>
+<dd><t>This field holds the length in bytes of the error cause.
+The value MUST be the length of the Cause-Specific Information plus 4.</t></dd>
+<dt>Chunk: variable length</dt>
+<dd><t>The Cause-Specific Information is filled with the chunk that caused this
+error.
 This can be an INIT, INIT ACK, or ASCONF chunk.
 Note that if the entire chunk will not fit in the ERROR chunk or ABORT chunk
-being sent then the bytes that do not fit are truncated.</t>
-</list></t>
-<t>[NOTE to RFC-Editor:
-<list>
-<t>Assignment of cause code to be confirmed by IANA.</t>
-</list>
-]</t>
+being sent then the bytes that do not fit are truncated.</t></dd>
+</dl>
+<t>[NOTE to RFC-Editor: Assignment of cause code to be confirmed by IANA.]</t>
 </section>
 </section>
 
-<section anchor='newparam' title='New Parameters' >
+<section anchor='newparam'>
+<name>New Parameters</name>
 <t>This section defines new parameters and their valid appearance
 defined by this document.</t>
-<section anchor='disrestart' title='Disable Restart Parameter' >
+<section anchor='disrestart'>
+<name>Disable Restart Parameter</name>
 <t>This parameter is used to indicate that the restart procedure
 is requested to be disabled. Both endpoints of an association MUST
 include this parameter in the INIT chunk and INIT ACK chunk when
 establishing an association and MUST include it in the ASCONF chunk
 when adding an address to successfully disable the restart procedure.</t>
-<figure align='center'>
-<artwork>
+<artwork align="left">
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |         Type = 0xC007         |         Length = 4            |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
-</figure>
 
-<t><list style="hanging">
-<t hangText="Parameter Type: 2 bytes (unsigned integer)">
-<vspace blankLines="0"/>
-This field holds the IANA defined parameter type for the Disable Restart Parameter.
-IANA is requested to assign the value 0xC007 for this parameter type.</t>
-
-<t hangText="Parameter Length: 2 bytes (unsigned integer)">
-<vspace blankLines="0"/>
-This field holds the length in bytes of the parameter. The value MUST be 4.</t>
-</list></t>
-<t>[NOTE to RFC-Editor:
-<list>
-<t>Assignment of parameter type to be confirmed by IANA.</t>
-</list>
-]</t>
+<dl>
+<dt>Parameter Type: 2 bytes (unsigned integer)</dt>
+<dd><t>This field holds the IANA defined parameter type for the Disable Restart Parameter.
+IANA is requested to assign the value 0xC007 for this parameter type.</t></dd>
+<dt>Parameter Length: 2 bytes (unsigned integer)</dt>
+<dd><t>This field holds the length in bytes of the parameter.
+The value MUST be 4.</t></dd>
+</dl>
+<t>[NOTE to RFC-Editor: Assignment of parameter type to be confirmed by IANA.]</t>
 <t>This parameter MAY appear in INIT, INIT ACK and ASCONF chunks and
 MUST NOT appear in any other chunk.</t>
 </section>
 
-<section anchor='vtags-parameter' title='VTags Parameter'>
+<section anchor='vtags-parameter'>
+<name>VTags Parameter</name>
 <t>This parameter is used to help a NAT recover from state loss.</t>
-<figure align='center'>
-<artwork>
+<artwork align="left">
  0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -744,77 +705,66 @@ MUST NOT appear in any other chunk.</t>
 |                   External Verification Tag                   |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
-</figure>
 
-<t><list style="hanging">
-<t hangText="Parameter Type: 2 bytes (unsigned integer)">
-<vspace blankLines="0"/>
-This field holds the IANA defined parameter type for the VTags Parameter.
-IANA is requested to assign the value 0xC008 for this parameter type.</t>
-
-<t hangText="Parameter Length: 2 bytes (unsigned integer)">
-<vspace blankLines="0"/>
-This field holds the length in bytes of the parameter. The value MUST be 16.</t>
-
-<t hangText="ASCONF-Request Correlation ID: 4 bytes (unsigned integer)">
-<vspace blankLines="0"/>
-This is an opaque integer assigned by the sender to identify each
+<dl>
+<dt>Parameter Type: 2 bytes (unsigned integer)</dt>
+<dd><t>This field holds the IANA defined parameter type for the VTags Parameter.
+IANA is requested to assign the value 0xC008 for this parameter type.</t></dd>
+<dt>Parameter Length: 2 bytes (unsigned integer)</dt>
+<dd><t>This field holds the length in bytes of the parameter.
+The value MUST be 16.</t></dd>
+<dt>ASCONF-Request Correlation ID: 4 bytes (unsigned integer)</dt>
+<dd><t>This is an opaque integer assigned by the sender to identify each
 request parameter. The receiver of the ASCONF Chunk will copy this
 32-bit value into the ASCONF Response Correlation ID field of the
 ASCONF ACK response parameter. The sender of the ASCONF can use this
 same value in the ASCONF ACK to find which request the response is
-for. Note that the receiver MUST NOT change this 32-bit value.</t>
-
-<t hangText="Internal Verification Tag: 4 bytes (unsigned integer)">
-<vspace blankLines="0"/>
-The Verification Tag that the internal host has chosen for its communication.
+for. Note that the receiver MUST NOT change this 32-bit value.</t></dd>
+<dt>Internal Verification Tag: 4 bytes (unsigned integer)</dt>
+<dd><t>The Verification Tag that the internal host has chosen for its communication.
 The Verification Tag is a unique 32-bit tag that must accompany
-any incoming SCTP packet for this association to the Private-Address.</t>
-
-<t hangText="External Verification Tag: 4 bytes (unsigned integer)">
-The Verification Tag that the host holding the External-Address has
+any incoming SCTP packet for this association to the Private-Address.</t></dd>
+<dt>External Verification Tag: 4 bytes (unsigned integer)</dt>
+<dd><t>The Verification Tag that the host holding the External-Address has
 chosen for its communication. The VTag is a unique 32-bit tag
 that must accompany any incoming SCTP packet for this
-association to the External-Address.</t>
-</list></t>
-<t>[NOTE to RFC-Editor:
-<list>
-<t>Assignment of parameter type to be confirmed by IANA.</t>
-</list>
-]</t>
+association to the External-Address.</t></dd>
+</dl>
+<t>[NOTE to RFC-Editor: Assignment of parameter type to be confirmed by IANA.]</t>
 <t>This parameter MAY appear in ASCONF chunks and MUST NOT appear in
 any other chunk.</t>
 </section>
 </section>
 </section>
 
-<section title='Procedures for SCTP Endpoints and NAT Devices'>
+<section>
+<name>Procedures for SCTP Endpoints and NAT Devices</name>
 <t>When an SCTP endpoint is behind an SCTP-aware NAT a
-number of problems may arise as it tries to communicate with its peer:
-<list style='symbols'>
-<t>IP addresses can not be included in the SCTP packet. This is
-discussed in <xref target='setup'/>.</t>
-<t>More than one host behind a NAT device could select the same VTag and source
+number of problems may arise as it tries to communicate with its peer:</t>
+<ul>
+<li><t>IP addresses can not be included in the SCTP packet. This is
+discussed in <xref target='setup'/>.</t></li>
+<li><t>More than one host behind a NAT device could select the same VTag and source
 port when talking to the same peer server. This creates a situation where
 the NAT will not be able to tell the two associations apart. This situation
-is discussed in <xref target='mbitport'/>.</t>
-<t>When an SCTP endpoint is a server communicating with multiple peers and the
+is discussed in <xref target='mbitport'/>.</t></li>
+<li><t>When an SCTP endpoint is a server communicating with multiple peers and the
 peers are behind the same NAT, then the two endpoints cannot be
-distinguished by the server. This case is discussed in <xref target='collision'/>.</t>
-<t>A restart of a NAT during a conversation could cause a loss of its state.
-This problem and its solution is discussed in <xref target='restart'/>.</t>
-<t>NAT devices need to deal with SCTP packets being fragmented at the IP layer.
-This is discussed in <xref target='fragmentation'/>.</t>
-<t>An SCTP endpoint may be behind two NAT devices providing redundancy.
+distinguished by the server. This case is discussed in <xref target='collision'/>.</t></li>
+<li><t>A restart of a NAT during a conversation could cause a loss of its state.
+This problem and its solution is discussed in <xref target='restart'/>.</t></li>
+<li><t>NAT devices need to deal with SCTP packets being fragmented at the IP layer.
+This is discussed in <xref target='fragmentation'/>.</t></li>
+<li><t>An SCTP endpoint may be behind two NAT devices providing redundancy.
 The method to set up this scenario is discussed in
-<xref target='multihomed'/>.</t>
-</list></t>
+<xref target='multihomed'/>.</t></li>
+</ul>
 <t>Each of these mechanisms requires additional chunks and parameters,
 defined in this document, and possibly modified handling procedures
 from those specified in <xref target='RFC4960'/>.</t>
 
-<section anchor='setup'
-         title='Association Setup Considerations for Endpoints'>
+<section anchor='setup'>
+<name>Association Setup Considerations for Endpoints</name>
 <t>The association setup procedure defined in <xref target='RFC4960'/>
 allows multi-homed SCTP endpoints to exchange its IP-addresses by using
 IPv4 or IPv6 address parameters in the INIT and INIT ACK chunks.
@@ -833,9 +783,8 @@ parameters.</t>
 defined in <xref target='disrestart'/>.</t>
 </section>
 
-<section anchor='mbitport'
-         title='Handling of Internal Port Number and Verification Tag Collisions'>
-
+<section anchor='mbitport'>
+<name>Handling of Internal Port Number and Verification Tag Collisions</name>
 <t>Consider the case where two hosts in the Private-Address space want to
 set up an SCTP association with the same service provided by some hosts
 in the Internet. This means that the External-Port is the same.
@@ -851,7 +800,8 @@ deterministically.</t>
 <t>The same can happen with the External-VTag when an INIT ACK chunk or
 an ASCONF chunk is processed by the NAT.</t>
 
-<section title='NAT Device Considerations'>
+<section>
+<name>NAT Device Considerations</name>
 <t>If the NAT device detects a collision of internal port numbers and
 verification tags, it MUST send an ABORT chunk with the M-bit set if the
 collision is triggered by an INIT or INIT ACK chunk.
@@ -870,7 +820,8 @@ with cause code 'VTag and Port Number Collision'
 (see <xref target='port_coll'/>).</t>
 </section>
 
-<section title='Endpoint Considerations'>
+<section>
+<name>Endpoint Considerations</name>
 <t>The sender of the packet containing the INIT chunk or the receiver
 of the INIT ACK chunk, upon reception of an ABORT chunk with M-bit set
 and the appropriate error cause code for colliding NAT binding table state is included,
@@ -883,8 +834,8 @@ M-bit set, MUST stop adding the path to the association.</t>
 </section>
 </section>
 
-<section anchor='collision'
-         title='Handling of Internal Port Number Collisions'>
+<section anchor='collision'>
+<name>Handling of Internal Port Number Collisions</name>
 <t>When two SCTP hosts are behind an SCTP-aware NAT it is possible that two
 SCTP hosts in the Private-Address space will want to set up an
 SCTP association with the same server running on the same host in the Internet.
@@ -892,30 +843,32 @@ If the two hosts choose the same internal port, this is considered an
 internal port number collision.</t>
 <t>For the NAT, appropriate tracking may be performed by assuring that the
 VTags are unique between the two hosts.</t>
-<section title='NAT Device Considerations'>
+<section>
+<name>NAT Device Considerations</name>
 <t>The NAT, when processing the INIT ACK, should note in its NAT binding table that
 the association supports the disable restart extension.
 This note is used when establishing future associations (i.e. when processing
 an INIT from an internal host) to decide if the connection should be allowed.
-The NAT device does the following when processing an INIT:
-<list style='symbols'>
-<t>If the INIT is originating from an internal port to an external port for
+The NAT device does the following when processing an INIT:</t>
+<ul>
+<li><t>If the INIT is originating from an internal port to an external port for
 which the NAT device has no matching NAT binding table entry,
 it MUST allow the INIT creating an NAT binding table
-entry.</t>
-<t>If the INIT matches an existing NAT binding table entry, it MUST validate
+entry.</t></li>
+<li><t>If the INIT matches an existing NAT binding table entry, it MUST validate
 that the disable restart feature is supported and, if it does, allow the INIT
-to be forwarded.</t>
-<t>If the disable restart feature is not supported, the NAT device MUST send
-an ABORT with the M-bit set.</t>
-</list></t>
+to be forwarded.</t></li>
+<li><t>If the disable restart feature is not supported, the NAT device MUST send
+an ABORT with the M-bit set.</t></li>
+</ul>
 <t>The 'Port Number Collision' error cause (see <xref target='portcollide' />)
 MUST be included in the ABORT chunk sent in response to the INIT chunk.</t>
 <t>If the collision is triggered by an ASCONF chunk, a packet containing an
 ERROR chunk with the 'Port Number Collision' error cause MUST be sent in
 response to the ASCONF chunk.</t>
 </section>
-<section title='Endpoint Considerations'>
+<section>
+<name>Endpoint Considerations</name>
 <t>For the external SCTP server on the Internet this means that the
 External-Port and the External-Address are the same.
 If they both have chosen the same Internal-Port the server cannot distinguish
@@ -923,22 +876,23 @@ between both associations based on the address and port numbers.
 For the server it looks like the association is being restarted.
 To overcome this limitation the client sends a Disable Restart parameter in
 the INIT chunk.</t>
-<t>When the server receives this parameter it does the following:
-<list style='symbols'>
-<t>It MUST include a Disable Restart parameter in the INIT ACK to
-inform the client that it will support the feature.</t>
-<t>It MUST disable the restart procedures defined in <xref target='RFC4960'/>
-for this association.</t>
-</list></t>
+<t>When the server receives this parameter it does the following:</t>
+<ul>
+<li><t>It MUST include a Disable Restart parameter in the INIT ACK to
+inform the client that it will support the feature.</t></li>
+<li><t>It MUST disable the restart procedures defined in <xref target='RFC4960'/>
+for this association.</t></li>
+</ul>
 <t>Servers that support this feature will need to be capable of maintaining
 multiple connections to what appears to be the same peer
 (behind the NAT) differentiated only by the VTags.</t>
 </section>
 </section>
 
-<section anchor='restart'
-         title='Handling of Missing State'>
-<section title='NAT Device Considerations'>
+<section anchor='restart'>
+<name>Handling of Missing State</name>
+<section>
+<name>NAT Device Considerations</name>
 <t>If the NAT device receives a packet from the internal network
 for which the lookup procedure does not find an entry in the NAT binding table,
 a packet containing an ERROR chunk is sent back with the M-bit set.
@@ -958,25 +912,26 @@ and the packet contains an ASCONF chunk with the VTags parameter, the NAT
 device MUST update its NAT binding table according to the verification tags in
 the VTags parameter and the optional Disable Restart parameter.</t>
 </section>
-<section title='Endpoint Considerations'>
+<section>
+<name>Endpoint Considerations</name>
 <t>Upon reception of this ERROR chunk by an SCTP endpoint the
-receiver takes the following actions:
-<list style='symbols'>
-<t>It SHOULD validate that the verification tag is reflected by looking
+receiver takes the following actions:</t>
+<ul>
+<li><t>It SHOULD validate that the verification tag is reflected by looking
 at the VTag that would have been included in the outgoing
 packet.
-If the validation fails, discard the incoming ERROR chunk.</t>
-<t>It SHOULD validate that the peer of the SCTP association supports
+If the validation fails, discard the incoming ERROR chunk.</t></li>
+<li><t>It SHOULD validate that the peer of the SCTP association supports
 the dynamic address extension.
-If the validation fails, discard the incoming ERROR chunk.</t>
-<t>It SHOULD generate a new ASCONF chunk containing the VTags parameter
+If the validation fails, discard the incoming ERROR chunk.</t></li>
+<li><t>It SHOULD generate a new ASCONF chunk containing the VTags parameter
 (see <xref target='vtags-parameter'/>) and the Disable Restart
 parameter (see <xref target='disrestart'/>) if the association is using the
 disable restart feature.
 By processing this packet the NAT device can recover the appropriate state.
 The procedures for generating an ASCONF chunk can be found in
-<xref target='RFC5061'/>.</t>
-</list></t>
+<xref target='RFC5061'/>.</t></li>
+</ul>
 <t>The peer SCTP endpoint receiving such an ASCONF chunk SHOULD either
 add the address and respond with an acknowledgment, if the address is
 new to the association (following all procedures defined in
@@ -994,34 +949,34 @@ In such a case the NAT MUST send an ERROR chunk with the error cause code set to
 'Internal Port Number and Verification Tag collision' as the error cause
 and the packet in the Error Chunk contains an ASCONF with
 the VTags parameter, careful examination of the association is required.
-The endpoint does the following:
-<list style='symbols'>
-<t>It MUST validate that the verification tag is reflected by looking
+The endpoint does the following:</t>
+<ul>
+<li><t>It MUST validate that the verification tag is reflected by looking
 at the VTag that would have been included in the outgoing
-packet. If the validation fails, it MUST discard the packet.</t>
-<t>It MUST validate that the peer of the SCTP association supports
+packet. If the validation fails, it MUST discard the packet.</t></li>
+<li><t>It MUST validate that the peer of the SCTP association supports
 the dynamic address extension. If the peer does not support it, the NAT Device
-MUST discard the incoming ERROR chunk.</t>
-<t>If the association is attempting to add an address (i.e. following
+MUST discard the incoming ERROR chunk.</t></li>
+<li><t>If the association is attempting to add an address (i.e. following
 the procedures in <xref target='multihomed'/>) then the endpoint MUST NOT
 consider the address part of the association and SHOULD make no
 further attempt to add the address (i.e. cancel any ASCONF timers and
 remove any record of the path), since the NAT device has a VTag collision
 and the association cannot easily create a new VTag (as it would if
-the error occurred when sending an INIT).</t>
-<t>If the endpoint has no other path, i.e. the procedure was executed
+the error occurred when sending an INIT).</t></li>
+<li><t>If the endpoint has no other path, i.e. the procedure was executed
 due to missing a state in the NAT device, then the endpoint MUST abort the
 association.
 This would occur only if the local NAT device restarted and accepted a new
 association before attempting to repair the missing state (Note that this
 is no different than what happens to all TCP connections when a NAT device
-looses its state).</t>
-</list></t>
+looses its state).</t></li>
+</ul>
 </section>
 </section>
 
-<section anchor='fragmentation'
-         title='Handling of Fragmented SCTP Packets by NAT Devices'>
+<section anchor='fragmentation'>
+<name>Handling of Fragmented SCTP Packets by NAT Devices</name>
 <t>A NAT device MUST support IP reassembly of received fragmented
 SCTP packets. The fragments may arrive in any order.</t>
 <t>When an SCTP packet has to be fragmented by the NAT device and
@@ -1029,8 +984,8 @@ the IP header forbids fragmentation a corresponding ICMP packet SHOULD
 be sent.</t>
 </section>
 
-<section anchor='multihomed'
-         title='Multi Point Traversal Considerations for Endpoints'>
+<section anchor='multihomed'>
+<name>Multi Point Traversal Considerations for Endpoints</name>
 <t>If a multi-homed SCTP endpoint behind a NAT connects to a peer,
 it MUST first set up the association single-homed with only one
 address causing the first NAT to populate its state.
@@ -1042,7 +997,8 @@ optionally the Disable Restart parameter.</t>
 
 </section>
 
-<section title='Various Examples of NAT Traversals'>
+<section>
+<name>Various Examples of NAT Traversals</name>
 <t>Please note that this section is informational only.</t>
 <t>The addresses being used in the following examples are IPv4 addresses
 for private-use networks and for documentation as specified in <xref target='RFC6890'/>.
@@ -1050,12 +1006,12 @@ However, the method described here is not limited to this NAT44 case.</t>
 <t>The NAT binding table entries shown in the following examples do not
 include the flag indicating whether the restart procedure is supported or not.
 This flag is not relevant for these examples.</t>
-<section title='Single-homed Client to Single-homed Server'>
+<section>
+<name>Single-homed Client to Single-homed Server</name>
 <t>The internal client starts the association with the external
 server via a four-way-handshake. Host A starts by sending an
 INIT chunk.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
@@ -1072,11 +1028,9 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
         Ext-VTtag = 0
 ]]>
 </artwork>
-</figure>
 <t>A NAT binding tabled entry is created, the source address is substituted and the
 packet is sent on:</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
        NAT creates entry:
        +---------+--------+----------+--------+-----------+
@@ -1091,11 +1045,9 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                                         Ext-VTtag = 0
 ]]>
 </artwork>
-</figure>
 <t>Host B receives the INIT and sends an INIT ACK with the NAT's external
 address as destination address.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
@@ -1121,10 +1073,8 @@ INIT ACK[Initiate-Tag = 5678]
           Int-VTag = 1234
 ]]>
 </artwork>
-</figure>
 <t>The handshake finishes with a COOKIE ECHO acknowledged by a COOKIE ACK.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
@@ -1150,15 +1100,14 @@ INIT ACK[Initiate-Tag = 5678]
            Int-VTag = 1234
 ]]>
 </artwork>
-</figure>
 </section>
 
-<section title='Single-homed Client to Multi-homed Server'>
+<section>
+<name>Single-homed Client to Multi-homed Server</name>
 <t>The internal client is single-homed whereas the external server is
 multi-homed. The client (Host A) sends an INIT like in the single-homed case.
 </t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                                +--------+
                                /--\/--\      /-|Router 1| \
@@ -1179,10 +1128,8 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        Ext-VTag = 0
 ]]>
 </artwork>
-</figure>
 <t>NAT creates entry:</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
        +---------+--------+----------+--------+-----------+
 NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
@@ -1196,10 +1143,8 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                                   Ext-VTag = 0
 ]]>
 </artwork>
-</figure>
 <t>The server (Host B) includes its two addresses in the INIT ACK chunk.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                                +--------+
                                /--\/--\      /-|Router 1| \
@@ -1214,11 +1159,9 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                                  Int-VTag = 1234
 ]]>
 </artwork>
-</figure>
 <t>The NAT device does not need to change the NAT binding table for the second
 address:</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
        +---------+--------+----------+--------+-----------+
 NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
@@ -1233,10 +1176,8 @@ INIT ACK[Initiate-Tag = 5678]
          Int-VTag = 1234
 ]]>
 </artwork>
-</figure>
 <t>The handshake finishes with a COOKIE ECHO acknowledged by a COOKIE ACK.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                                +--------+
                                /--\/--\      /-|Router 1| \
@@ -1264,16 +1205,15 @@ INIT ACK[Initiate-Tag = 5678]
          Int-VTag = 1234
 ]]>
 </artwork>
-</figure>
 </section>
 
-<section title='Multihomed Client and Server'>
+<section>
+<name>Multihomed Client and Server</name>
 <!-- FIXME: Make figures in this section and the provious one
             similar with respect to the multihoming of Host B -->
 <t>The client (Host A) sends an INIT to the server (Host B), but does not
 include the second address.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                +-------+
             /--| NAT 1 |--\       /--\/--\
@@ -1293,10 +1233,8 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
          Ext-VTag = 0
 ]]>
 </artwork>
-</figure>
 <t>NAT 1 creates entry:</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
        +---------+--------+----------+--------+-----------+
 NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
@@ -1311,10 +1249,8 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                                         ExtVTag = 0
 ]]>
 </artwork>
-</figure>
 <t>Host B includes its second address in the INIT ACK.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                      +-------+
             /--------| NAT 1 |--------\       /--\/--\
@@ -1329,10 +1265,8 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                                    Int-VTag = 1234
 ]]>
 </artwork>
-</figure>
 <t>NAT 1 does not need to update the NAT binding table for the second address:</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
        +---------+--------+----------+--------+-----------+
 NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
@@ -1347,10 +1281,8 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
             Int-VTag = 1234
 ]]>
 </artwork>
-</figure>
 <t>The handshake finishes with a COOKIE ECHO acknowledged by a COOKIE ACK.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                      +-------+
             /--------| NAT 1 |--------\       /--\/--\
@@ -1378,16 +1310,13 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
            Int-VTag = 1234
 ]]>
 </artwork>
-</figure>
 <t>Host A announces its second address in an ASCONF chunk.
 The address parameter contains an undefined address (0) to indicate that
 the source address should be added.
 The lookup address parameter within the ASCONF chunk will also contain
 the pair of VTags (external and internal) so that the NAT may populate
 its NAT binding table entry completely with this single packet.</t>
-
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                      +-------+
             /--------| NAT 1 |--------\       /--\/--\
@@ -1402,10 +1331,8 @@ ASCONF [ADD-IP=0.0.0.0, INT-VTag=1234, Ext-VTag = 5678]
          Ext-VTag = 5678
 ]]>
 </artwork>
-</figure>
 <t>NAT 2 creates a complete entry:</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
        +---------+--------+----------+--------+-----------+
 NAT 2  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
@@ -1428,14 +1355,13 @@ NAT 2  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
          Int-VTag = 1234
 ]]>
 </artwork>
-</figure>
 </section>
-<section title='NAT Loses Its State'>
+<section>
+<name>NAT Loses Its State</name>
 <t>Association is already established between Host A and Host B, when the NAT
 loses its state and obtains a new public address. Host A sends a DATA chunk
 to Host B.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                          /--\/--\
 +--------+              +-----+         /        \         +--------+
@@ -1453,12 +1379,10 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
             Ext-VTag = 5678
 ]]>
 </artwork>
-</figure>
 <t>The NAT device cannot find an entry in the NAT binding table for the association.
 It sends ERROR an message with the M-Bit set and the cause
 "NAT state missing".</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                          /--\/--\
 +--------+              +-----+         /        \         +--------+
@@ -1471,12 +1395,10 @@ It sends ERROR an message with the M-Bit set and the cause
           Ext-VTag = 5678
 ]]>
 </artwork>
-</figure>
 <t>On reception of the ERROR message, Host A sends an ASCONF chunk indicating
 that the former information has to be deleted and the source address of the
 actual packet added.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                          /--\/--\
 +--------+              +-----+         /        \         +--------+
@@ -1500,11 +1422,9 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                                      Ext-VTag = 5678
 ]]>
 </artwork>
-</figure>
 <t>Host B adds the new source address to this association and deletes
 all other addresses from this association.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
                                          /--\/--\
 +--------+              +-----+         /        \         +--------+
@@ -1528,9 +1448,9 @@ all other addresses from this association.</t>
                                      Ext-VTag = 5678
 ]]>
 </artwork>
-</figure>
 </section>
-<section title='Peer-to-Peer Communication'>
+<section>
+<name>Peer-to-Peer Communication</name>
 <t>If two hosts are behind NAT devices and want to communicate with each other,
 they have to get knowledge of the peer's public address.
 This can be achieved with a so-called rendezvous server.
@@ -1541,8 +1461,7 @@ point of view. Therefore, NAT A's Internal-VTag and Internal-Port are
 NAT B's External-VTag and External-Port, respectively.
 The naming (internal/external) of the verification tag in the packet
 flow is done from the sending host's point of view.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
           Internal | External           External | Internal
                    |                             |
@@ -1569,10 +1488,8 @@ INIT[Initiate-Tag = 1234]
         Ext-VTag = 0
 ]]>
 </artwork>
-</figure>
 <t>NAT A creates entry:</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
        +---------+--------+----------+--------+-----------+
 NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
@@ -1586,21 +1503,17 @@ NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                             Ext-VTag = 0
 ]]>
 </artwork>
-</figure>
 <t>NAT B processes INIT, but cannot find an entry. The SCTP packet is
 silently discarded and leaves the NAT binding table of NAT B unchanged.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
        +---------+--------+----------+--------+-----------+
 NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
 </artwork>
-</figure>
 <t>Now Host B sends INIT, which is processed by NAT B. Its parameters
 are used to create an entry.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
           Internal | External           External | Internal
                    |                             |
@@ -1626,11 +1539,9 @@ NAT B  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
                                   Ext-VTag = 0
 ]]>
 </artwork>
-</figure>
 <t>NAT A processes INIT. As the outgoing INIT of Host A has already created
 an entry, the entry is found and updated:</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
           Internal | External           External | Internal
                    |                             |
@@ -1653,10 +1564,8 @@ NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
           Ext-VTag = 0
 ]]>
 </artwork>
-</figure>
 <t>Host A sends INIT ACK, which can pass through NAT B:</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
           Internal | External           External | Internal
                    |                             |
@@ -1689,10 +1598,8 @@ NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                                                       Ext-VTag = 5678
 ]]>
 </artwork>
-</figure>
 <t>The lookup for COOKIE ECHO and COOKIE ACK is successful.</t>
-<figure align='center'>
-<artwork>
+<artwork align="center">
 <![CDATA[
           Internal | External           External | Internal
                    |                             |
@@ -1727,18 +1634,19 @@ NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
                                                  Ext-VTag = 5678
 ]]>
 </artwork>
-</figure>
 </section>
 </section>
 
-<section title="SCTP NAT YANG Module">
+<section>
+<name>SCTP NAT YANG Module</name>
 <t>This section defines a YANG module for SCTP NAT.</t>
 <t>The terminology for describing YANG data models is defined
 in <xref target="RFC7950" />.
 The meaning of the symbols in tree diagrams is defined
 in <xref target="RFC8340" />.</t>
 
-<section title=" Tree Structure">
+<section>
+<name>Tree Structure</name>
 <t>This module augments NAT YANG module <xref target="RFC8512" /> with
 SCTP specifics.
 The module supports both classical SCTP NAT (that is, rewrite port numbers)
@@ -1746,7 +1654,6 @@ and SCTP-specific variant where the ports numbers are not altered.
 The YANG "feature" is used to indicate whether SCTP-specific variant is
 supported.</t>
 <t>The tree structure of the SCTP NAT YANG module is provided below:</t>
-<figure>
 <artwork>
 <![CDATA[
 module: ietf-nat-sctp
@@ -1759,32 +1666,31 @@ module: ietf-nat-sctp
     +--rw ext-VTag?   uint32 {sctp-nat}?
 ]]>
 </artwork>
-</figure>
 <t>Concretely, the SCTP NAT YANG module augments the NAT YANG module
-(policy, in particular) with the following:
-<list style="symbols">
-<t>The sctp-timeout is used to control the SCTP inactivity timeout.
+(policy, in particular) with the following:</t>
+<ul>
+<li><t>The sctp-timeout is used to control the SCTP inactivity timeout.
 That is, the time an SCTP mapping will stay active without SCTP packets
 traversing the NAT.
 This timeout can be set only for SCTP.
 Hence, "/nat:nat/nat:instances/nat:instance/nat:policy/nat:transport-protocols/nat:protocol-id"
-MUST be set to '132' (SCTP).</t>
-</list></t>
+MUST be set to '132' (SCTP).</t></li>
+</ul>
 
 <t>In addition, the SCTP NAT YANG module augments the mapping entry
 with the following parameters defined in <xref target='terminology' />.
 These parameters apply only for SCTP NAT mapping entries (i.e.,
 "/nat/instances/instance/mapping-table/mapping-entry/transport-protocol"
-MUST be set to '132');
-<list style="symbols">
-<t>The Internal Verification Tag (Int-VTag)</t>
-<t>The External Verification Tag (Ext-VTag)</t>
-</list></t>
+MUST be set to '132');</t>
+<ul>
+<li><t>The Internal Verification Tag (Int-VTag)</t></li>
+<li><t>The External Verification Tag (Ext-VTag)</t></li>
+</ul>
 </section>
 
-<section title="YANG Module">
-<figure>
-<artwork>
+<section>
+<name>YANG Module</name>
+<sourcecode>
 <![CDATA[
 <CODE BEGINS>
 module ietf-nat-sctp {
@@ -1885,12 +1791,12 @@ module ietf-nat-sctp {
 }
 <CODE ENDS>
 ]]>
-</artwork>
-</figure>
+</sourcecode>
 </section>
 </section>
 
-<section title='Socket API Considerations'>
+<section>
+<name>Socket API Considerations</name>
 <t>This section describes how the socket API defined in
 <xref target='RFC6458'/> is extended to provide a way for the
 application to control NAT friendliness.</t>
@@ -1899,127 +1805,128 @@ application to control NAT friendliness.</t>
 <t>A socket API implementation based on <xref target='RFC6458'/>
 is extended by supporting one new read/write socket option.</t>
 
-<section title='Get or Set the NAT Friendliness
-                (SCTP_NAT_FRIENDLY)'>
+<section>
+<name>Get or Set the NAT Friendliness (SCTP_NAT_FRIENDLY)</name>
 <t>This socket option uses the option_level IPPROTO_SCTP and the
 option_name SCTP_NAT_FRIENDLY. It can be used to enable/disable the
 NAT friendliness for future associations and retrieve the value
 for future and specific ones.</t>
-<figure>
 <artwork>
 struct sctp_assoc_value {
   sctp_assoc_t assoc_id;
   uint32_t assoc_value;
 };
 </artwork>
-</figure>
-<t>
-<list style='hanging'>
-<t hangText="assoc_id:">
-This parameter is ignored for one-to-one style sockets.
+<dl>
+<dt>assoc_id</dt>
+<dd><t>This parameter is ignored for one-to-one style sockets.
 For one-to-many style sockets the application may fill in an association
 identifier or SCTP_FUTURE_ASSOC for this query.
-It is an error to use SCTP_{CURRENT|ALL}_ASSOC in assoc_id.</t>
-<t hangText="assoc_value:">
-A non-zero value indicates a NAT-friendly mode.</t>
-</list></t>
+It is an error to use SCTP_{CURRENT|ALL}_ASSOC in assoc_id.</t></dd>
+<dt>assoc_value</dt>
+<dd><t>A non-zero value indicates a NAT-friendly mode.</t></dd>
+</dl>
 </section>
 </section>
 
-<section title='IANA Considerations'>
-
-<t>[NOTE to RFC-Editor:
-<list>
-<t>"RFCXXXX" is to be replaced by the RFC number you assign this document.</t>
-</list>
-]</t>
-<t>[NOTE to RFC-Editor:
-<list>
-<t>The requested values for the chunk type and the chunk parameter types
-are tentative and to be confirmed by IANA.</t>
-</list>
-]</t>
+<section>
+<name>IANA Considerations</name>
+<t>[NOTE to RFC-Editor: "RFCXXXX" is to be replaced by the RFC number you
+assign this document.]</t>
+<t>[NOTE to RFC-Editor: The requested values for the chunk type and the chunk
+parameter types are tentative and to be confirmed by IANA.]</t>
 <t>This document (RFCXXXX) is the reference for all registrations
 described in this section.
 The requested changes are described below.</t>
 
-<section title='New Chunk Flags for Two Existing Chunk Types'>
+<section>
+<name>New Chunk Flags for Two Existing Chunk Types</name>
 <t>As defined in  <xref target='RFC6096'/> two chunk flags have to be assigned
 by IANA for the ERROR chunk. The requested value for the T bit is 0x01 and
 for the M bit is 0x02.</t>
 
 <t>This requires an update of the "ERROR Chunk Flags" registry for SCTP:</t>
-<texttable>
-<preamble>ERROR Chunk Flags</preamble>
-<ttcol align='left'>Chunk Flag Value</ttcol>
-<ttcol align='left'>Chunk Flag Name</ttcol>
-<ttcol align='left'>Reference</ttcol>
-<c>0x01</c> <c>T bit     </c> <c>[RFCXXXX]</c>
-<c>0x02</c> <c>M bit     </c> <c>[RFCXXXX]</c>
-<c>0x04</c> <c>Unassigned</c> <c>         </c>
-<c>0x08</c> <c>Unassigned</c> <c>         </c>
-<c>0x10</c> <c>Unassigned</c> <c>         </c>
-<c>0x20</c> <c>Unassigned</c> <c>         </c>
-<c>0x40</c> <c>Unassigned</c> <c>         </c>
-<c>0x80</c> <c>Unassigned</c> <c>         </c>
-</texttable>
+<t>ERROR Chunk Flags</t>
+<table>
+<thead>
+<tr><th>Chunk Flag Value</th> <th>Chunk Flag Name</th> <th>Reference</th></tr>
+</thead>
+<tbody>
+<tr><td>0x01</td>             <td>T bit     </td>      <td>[RFCXXXX]</td></tr>
+<tr><td>0x02</td>             <td>M bit     </td>      <td>[RFCXXXX]</td></tr>
+<tr><td>0x04</td>             <td>Unassigned</td>      <td>         </td></tr>
+<tr><td>0x08</td>             <td>Unassigned</td>      <td>         </td></tr>
+<tr><td>0x10</td>             <td>Unassigned</td>      <td>         </td></tr>
+<tr><td>0x20</td>             <td>Unassigned</td>      <td>         </td></tr>
+<tr><td>0x40</td>             <td>Unassigned</td>      <td>         </td></tr>
+<tr><td>0x80</td>             <td>Unassigned</td>      <td>         </td></tr>
+</tbody>
+</table>
 
 <t>As defined in  <xref target='RFC6096'/> one chunk flag has to be assigned
 by IANA for the ABORT chunk. The requested value of the M bit is 0x02.</t>
 <t>This requires an update of the "ABORT Chunk Flags" registry for SCTP:</t>
-<texttable>
-<preamble>ABORT Chunk Flags</preamble>
-<ttcol align='left'>Chunk Flag Value</ttcol>
-<ttcol align='left'>Chunk Flag Name</ttcol>
-<ttcol align='left'>Reference</ttcol>
-<c>0x01</c> <c>T bit     </c> <c>[RFC4960]</c>
-<c>0x02</c> <c>M bit     </c> <c>[RFCXXXX]</c>
-<c>0x04</c> <c>Unassigned</c> <c>         </c>
-<c>0x08</c> <c>Unassigned</c> <c>         </c>
-<c>0x10</c> <c>Unassigned</c> <c>         </c>
-<c>0x20</c> <c>Unassigned</c> <c>         </c>
-<c>0x40</c> <c>Unassigned</c> <c>         </c>
-<c>0x80</c> <c>Unassigned</c> <c>         </c>
-</texttable>
+<t>ABORT Chunk Flags</t>
+<table>
+<thead>
+<tr><th>Chunk Flag Value</th> <th>Chunk Flag Name</th> <th>Reference</th></tr>
+</thead>
+<tbody>
+<tr><td>0x01</td>             <td>T bit     </td>      <td>[RFC4960]</td></tr>
+<tr><td>0x02</td>             <td>M bit     </td>      <td>[RFCXXXX]</td></tr>
+<tr><td>0x04</td>             <td>Unassigned</td>      <td>         </td></tr>
+<tr><td>0x08</td>             <td>Unassigned</td>      <td>         </td></tr>
+<tr><td>0x10</td>             <td>Unassigned</td>      <td>         </td></tr>
+<tr><td>0x20</td>             <td>Unassigned</td>      <td>         </td></tr>
+<tr><td>0x40</td>             <td>Unassigned</td>      <td>         </td></tr>
+<tr><td>0x80</td>             <td>Unassigned</td>      <td>         </td></tr>
+</tbody>
+</table>
 </section>
 
-<section title='Three New Error Causes'>
+<section>
+<name>Three New Error Causes</name>
 <t>Three error causes have to be assigned by IANA.
 It is requested to use the values given below.</t>
 <t>This requires three additional lines in the "Error Cause Codes"
 registry for SCTP:</t>
-<texttable>
-<preamble>Error Cause Codes</preamble>
-<ttcol align='left'>Value</ttcol>
-<ttcol align='left'>Cause Code</ttcol>
-<ttcol align='left'>Reference</ttcol>
-<c>176</c> <c>VTag and Port Number Collision</c> <c>[RFCXXXX]</c>
-<c>177</c> <c>Missing State                 </c> <c>[RFCXXXX]</c>
-<c>178</c> <c>Port Number Collision         </c> <c>[RFCXXXX]</c>
-</texttable>
+<t>Error Cause Codes</t>
+<table>
+<thead>
+<tr><th>Value</th> <th>Cause Code                    </th> <th>Reference</th></tr>
+</thead>
+<tbody>
+<tr><td>176  </td> <td>VTag and Port Number Collision</td> <td>[RFCXXXX]</td></tr>
+<tr><td>177  </td> <td>Missing State                 </td> <td>[RFCXXXX]</td></tr>
+<tr><td>178  </td> <td>Port Number Collision         </td> <td>[RFCXXXX]</td></tr>
+</tbody>
+</table>
 </section>
 
-<section title='Two New Chunk Parameter Types'>
+<section>
+<name>Two New Chunk Parameter Types</name>
 <t>Two chunk parameter types have to be assigned by IANA.
 It is requested to use the values given below.
 IANA should assign these values from the pool of parameters with the upper
 two bits set to '11'.</t>
 <t>This requires two additional lines in the "Chunk Parameter Types"
 registry for SCTP:</t>
-<texttable>
-<preamble>Chunk Parameter Types</preamble>
-<ttcol align='left'>ID Value</ttcol>
-<ttcol align='left'>Chunk Parameter Type</ttcol>
-<ttcol align='left'>Reference</ttcol>
-<c>49159</c> <c>Disable Restart (0xC007)</c> <c>[RFCXXXX]</c>
-<c>49160</c> <c>VTags (0xC008)          </c> <c>[RFCXXXX]</c>
-</texttable>
+<t>Chunk Parameter Types</t>
+<table>
+<thead>
+<tr><th>ID Value</th> <th>Chunk Parameter Type    </th> <th>Reference</th></tr>
+</thead>
+<tbody>
+<tr><td>49159   </td> <td>Disable Restart (0xC007)</td> <td>[RFCXXXX]</td></tr>
+<tr><td>49160   </td> <td>VTags (0xC008)          </td> <td>[RFCXXXX]</td></tr>
+</tbody>
+</table>
 </section>
 
-<section title='One New URI'>
+<section>
+<name>One New URI</name>
 <t>An URI in the "ns" subregistry within the "IETF XML" registry has to be
 assigned by IANA (<xref target="RFC3688" />):</t>
-<figure>
 <artwork>
 <![CDATA[
     URI: urn:ietf:params:xml:ns:yang:ietf-nat-sctp
@@ -2027,14 +1934,13 @@ assigned by IANA (<xref target="RFC3688" />):</t>
     XML: N/A; the requested URI is an XML namespace.
 ]]>
 </artwork>
-</figure>
 </section>
 
-<section title='One New YANG Module'>
+<section>
+<name>One New YANG Module</name>
 <t>An YANG module in the "YANG Module Names" subregistry within the
 "YANG Parameters" registry has to be assigned by IANA
 (<xref target="RFC6020" />):</t>
-<figure>
 <artwork>
 <![CDATA[
     Name: ietf-nat-sctp
@@ -2044,11 +1950,11 @@ assigned by IANA (<xref target="RFC3688" />):</t>
     Reference: RFCXXXX
 ]]>
 </artwork>
-</figure>
 </section>
 </section>
 
-<section title='Security Considerations'>
+<section>
+<name>Security Considerations</name>
 <t>State maintenance within a NAT is always a subject of possible
 Denial Of Service attacks. This document recommends that at
 a minimum a NAT runs a timer on any SCTP state so that old
@@ -2079,16 +1985,16 @@ and deleted (i.e., config true, which is the default) are considered sensitive.
 Write operations (e.g., edit-config) applied to these data nodes without proper
 protection can negatively affect network operations.
 An attacker who is able to access the SCTP NAT function can undertake various
-attacks, such as:
-<list style="symbols">
-<t>Setting a low timeout for SCTP mapping entries to cause failures to deliver
-incoming SCTP packets.</t>
-<t>Instantiating mapping entries to cause NAT collision.</t>
-</list>
-</t>
+attacks, such as:</t>
+<ul>
+<li><t>Setting a low timeout for SCTP mapping entries to cause failures to deliver
+incoming SCTP packets.</t></li>
+<li><t>Instantiating mapping entries to cause NAT collision.</t></li>
+</ul>
 </section>
 
-<section title='Acknowledgments'>
+<section>
+<name>Acknowledgments</name>
 <t>The authors wish to thank
 Mohamed Boucadair,
 Gorry Fairhurst,
@@ -2110,31 +2016,33 @@ text related to the YANG module.</t>
 </middle>
 
 <back>
-<references title='Normative References'>
-<?rfc include='reference.RFC.2119' ?>
-<?rfc include='reference.RFC.3688' ?>
-<?rfc include='reference.RFC.4895' ?>
-<?rfc include='reference.RFC.4960' ?>
-<?rfc include='reference.RFC.5061' ?>
-<?rfc include='reference.RFC.6020' ?>
-<?rfc include='reference.RFC.6096' ?>
-<?rfc include='reference.RFC.6241' ?>
-<?rfc include='reference.RFC.6242' ?>
-<?rfc include='reference.RFC.8040' ?>
-<?rfc include='reference.RFC.8174' ?>
-<?rfc include='reference.RFC.8341' ?>
-<?rfc include='reference.RFC.8446' ?>
-<?rfc include='reference.RFC.8512' ?>
+<references>
+<name>Normative References</name>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3688.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4895.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4960.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5061.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6020.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6096.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6241.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6242.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8040.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8341.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8446.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8512.xml"/>
 </references>
-<references title='Informative References'>
-<?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml-doi/reference.DOI.10.1145/1496091.1496095' ?>
-<?rfc include='reference.RFC.0793' ?>
-<?rfc include='reference.RFC.6269' ?>
-<?rfc include='reference.RFC.6458' ?>
-<?rfc include='reference.RFC.6890' ?>
-<?rfc include='reference.RFC.6951' ?>
-<?rfc include='reference.RFC.7950' ?>
-<?rfc include='reference.RFC.8340' ?>
+<references>
+<name>Informative References</name>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml-doi/reference.DOI.10.1145/1496091.1496095.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.0793.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6269.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6458.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6890.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6951.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7950.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8340.xml"/>
 </references>
 </back>
 </rfc>
