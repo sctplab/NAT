@@ -346,7 +346,9 @@ of Internal-VTag, Internal-Port, External-VTag, External-Port, Private-Address,
 and whether the restart procedure is disabled or not.
 An entry in that NAT binding table is called a NAT state control block.
 The function Create() obtains the just mentioned parameters and returns
-a NAT-State control block.</t>
+a NAT-State control block.
+A NAT device MAY allow creating NAT-State control blocks via a management
+interface.</t>
 
 <t>For SCTP packets coming from the public Internet the destination
 address of the packets has to be replaced with the Private-Address
@@ -400,6 +402,9 @@ sent back to the SCTP host with the M-Bit set and an appropriate error
 cause (see <xref target='mbitabort'/> for the format).
 The source address of the packet containing the ABORT chunk MUST be the
 destination address of the packet containing the INIT chunk.</t>
+<t>If an outgoing SCTP packet contains an INIT or ASCONF chunk and a matching
+NAT binding table entry is found, the packet is processed as a normal
+outgoing packet.</t>
 <t>It is also possible that a connection to External-Address and External-Port
 exists without an Internal-VTag conflict but there exists a NAT binding
 table entry with the same port numbers but a different Private-Address.
@@ -426,7 +431,6 @@ Priv-Addr:Int-Port ------> Ext-Addr:Ext-Port
                                            Ext-VTag
 ]]>
 </artwork>
-
 <t>The processing of incoming SCTP packets containing an INIT ACK chunk
 is described in the following figure. The Lookup() function getting as
 input the Internal-VTag, Internal-Port, External-VTag, and External-Port,
@@ -487,6 +491,9 @@ Priv-Addr:Int-Port <------ Ext-Addr:Ext-Port
 only based on the addresses and port numbers.
 If an entry with an External-VTag of zero is found, it is considered a
 match and the External-VTag is updated.
+If an entry with a non-matching External-VTag is found or no entry is found,
+the incoming packet is dropped. If an entry with a matching External-VTag
+is found, the incoming packet is forwarded.
 This allows the handling of INIT collision through NAT.</t>
 <t>The processing of other incoming SCTP packets is described in the
 following figure.</t>
