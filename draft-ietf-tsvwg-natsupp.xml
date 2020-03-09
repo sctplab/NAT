@@ -10,7 +10,7 @@
      submissionType="IETF"
      consensus="true"
      category="std"
-     docName="draft-ietf-tsvwg-natsupp-16-to-be"
+     docName="draft-ietf-tsvwg-natsupp-16"
      version="3">
 
 <!--
@@ -22,7 +22,7 @@
 <title abbrev='SCTP NAT Support'>
 Stream Control Transmission Protocol (SCTP) Network Address Translation Support
 </title>
-<seriesInfo name="Internet-Draft" value="draft-ietf-tsvwg-natsupp-16-to-be"/>
+<seriesInfo name="Internet-Draft" value="draft-ietf-tsvwg-natsupp-16"/>
 
 <!-- ************** RANDALL STEWART ***************-->
 <author initials='R. R.' surname='Stewart' fullname='Randall R. Stewart'>
