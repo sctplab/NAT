@@ -39,9 +39,9 @@ Stream Control Transmission Protocol (SCTP) Network Address Translation Support
 </author>
 
 <!-- ************** MICHAEL TUEXEN *************** -->
-<author initials='M.' surname='Tuexen' fullname='Michael Tuexen'>
-    <organization abbrev='Muenster Univ. of Appl. Sciences'>
-                  Muenster University of Applied Sciences</organization>
+<author initials='M.' surname='Tüxen' fullname='Michael Tüxen'>
+    <organization abbrev='Münster Univ. of Appl. Sciences'>
+                  Münster University of Applied Sciences</organization>
     <address>
         <postal>
             <street>Stegerwaldstrasse 39</street>
@@ -53,17 +53,17 @@ Stream Control Transmission Protocol (SCTP) Network Address Translation Support
 </author>
 
 <!-- *************** IRENE RUENGELER ***************** -->
-<author initials='I.' surname='Ruengeler' fullname='Irene Ruengeler'>
-<organization abbrev='Muenster Univ. of Appl. Sciences'>
-              Muenster University of Applied Sciences</organization>
-<address>
-    <postal>
-        <street>Stegerwaldstrasse 39</street>
-        <city>48565 Steinfurt</city>
-        <country>DE</country>
-    </postal>
-    <email>i.ruengeler@fh-muenster.de</email>
-</address>
+<author initials='I.' surname='Rüngeler' fullname='Irene Rüngeler'>
+    <organization abbrev='Münster Univ. of Appl. Sciences'>
+                  Münster University of Applied Sciences</organization>
+    <address>
+        <postal>
+            <street>Stegerwaldstrasse 39</street>
+            <city>48565 Steinfurt</city>
+            <country>DE</country>
+        </postal>
+        <email>i.ruengeler@fh-muenster.de</email>
+    </address>
 </author>
 
 <date/>
