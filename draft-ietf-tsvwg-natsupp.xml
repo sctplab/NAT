@@ -180,7 +180,7 @@ and only when, they appear in all capitals, as shown here.</t>
 <t>This document uses the following terms, which are depicted in
 <xref target='terminology_fig'/>. Familiarity with the terminology used in
 <xref target='RFC4960'/> and <xref target='RFC5061'/> is assumed.</t>
-<dl>
+<dl newline="true">
 <dt>Private-Address (Priv-Addr)</dt>
 <dd><t>The private address that is known to the internal host.</t></dd>
 <dt>Internal-Port (Int-Port)</dt>
@@ -586,7 +586,7 @@ by a middle box.</t>
 /                                                              \
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
-<dl>
+<dl newline="true">
 <dt>Cause Code: 2 bytes (unsigned integer)</dt>
 <dd><t>This field holds the IANA defined cause code for the
 'VTag and Port Number Collision' Error Cause.
@@ -616,7 +616,7 @@ being sent then the bytes that do not fit are truncated.</t></dd>
 /                                                              \
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
-<dl>
+<dl newline="true">
 <dt>Cause Code: 2 bytes (unsigned integer)</dt>
 <dd><t>This field holds the IANA defined cause code for the
 'Missing State' Error Cause.
@@ -645,7 +645,7 @@ being sent then the bytes that do not fit are truncated.</t></dd>
 /                                                              \
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
-<dl>
+<dl newline="true">
 <dt>Cause Code: 2 bytes (unsigned integer)</dt>
 <dd><t>This field holds the IANA defined cause code for the
 'Port Number Collision' Error Cause.
@@ -683,7 +683,7 @@ when adding an address to successfully disable the restart procedure.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
 
-<dl>
+<dl newline="true">
 <dt>Parameter Type: 2 bytes (unsigned integer)</dt>
 <dd><t>This field holds the IANA defined parameter type for the Disable Restart Parameter.
 IANA is requested to assign the value 0xC007 for this parameter type.</t></dd>
@@ -713,7 +713,7 @@ MUST NOT appear in any other chunk.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
 
-<dl>
+<dl newline="true">
 <dt>Parameter Type: 2 bytes (unsigned integer)</dt>
 <dd><t>This field holds the IANA defined parameter type for the VTags Parameter.
 IANA is requested to assign the value 0xC008 for this parameter type.</t></dd>
@@ -1824,7 +1824,7 @@ struct sctp_assoc_value {
   uint32_t assoc_value;
 };
 </artwork>
-<dl>
+<dl newline="true">
 <dt>assoc_id</dt>
 <dd><t>This parameter is ignored for one-to-one style sockets.
 For one-to-many style sockets the application may fill in an association
