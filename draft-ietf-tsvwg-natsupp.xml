@@ -1699,7 +1699,7 @@ MUST be set to '132');</t>
 <name>YANG Module</name>
 <sourcecode>
 <![CDATA[
-<CODE BEGINS>
+<CODE BEGINS> file "ietf-nat-sctp@2020-07-11.yang"
 module ietf-nat-sctp {
   yang-version 1.1;
   namespace "urn:ietf:params:xml:ns:yang:ietf-nat-sctp";
@@ -1727,7 +1727,7 @@ module ietf-nat-sctp {
      and a, SCTP-specific variant where the ports numbers are
      not altered.
 
-     Copyright (c) 2019 IETF Trust and the persons identified as
+     Copyright (c) 2020 IETF Trust and the persons identified as
      authors of the code.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
