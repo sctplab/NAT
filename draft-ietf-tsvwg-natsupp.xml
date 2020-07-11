@@ -39,9 +39,9 @@ Stream Control Transmission Protocol (SCTP) Network Address Translation Support
 </author>
 
 <!-- ************** MICHAEL TUEXEN *************** -->
-<author initials='M.' surname='Tuexen' fullname='Michael Tuexen'>
-    <organization abbrev='Muenster Univ. of Appl. Sciences'>
-                  Muenster University of Applied Sciences</organization>
+<author initials='M.' surname='Tüxen' fullname='Michael Tüxen'>
+    <organization abbrev='Münster Univ. of Appl. Sciences'>
+                  Münster University of Applied Sciences</organization>
     <address>
         <postal>
             <street>Stegerwaldstrasse 39</street>
@@ -53,9 +53,9 @@ Stream Control Transmission Protocol (SCTP) Network Address Translation Support
 </author>
 
 <!-- *************** IRENE RUENGELER ***************** -->
-<author initials='I.' surname='Ruengeler' fullname='Irene Ruengeler'>
-    <organization abbrev='Muenster Univ. of Appl. Sciences'>
-                  Muenster University of Applied Sciences</organization>
+<author initials='I.' surname='Rüngeler' fullname='Irene Rüngeler'>
+    <organization abbrev='Münster Univ. of Appl. Sciences'>
+                  Münster University of Applied Sciences</organization>
     <address>
         <postal>
             <street>Stegerwaldstrasse 39</street>
@@ -2000,26 +2000,6 @@ incoming SCTP packets.</t></li>
 </ul>
 </section>
 
-<section>
-<name>Acknowledgments</name>
-<t>The authors wish to thank
-Mohamed Boucadair,
-Gorry Fairhurst,
-Bryan Ford,
-David Hayes,
-Alfred Hines,
-Karen E. E. Nielsen,
-Henning Peters,
-Maksim Proshin,
-Timo Voelker,
-Dan Wing,
-and Qiaobing Xie
-for their invaluable comments.</t>
-<t>In addition, the authors wish to thank David Hayes, Jason But, and Grenville Armitage,
-the authors of <xref target='DOI_10.1145_1496091.1496095'/>, for their suggestions.</t>
-<t>The authors also wish to thank Mohamed Boucadair for contributing the
-text related to the YANG module.</t>
-</section>
 </middle>
 
 <back>
@@ -2051,5 +2031,26 @@ text related to the YANG module.</t>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7950.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8340.xml"/>
 </references>
+<section numbered='false'>
+<name>Acknowledgments</name>
+<t>The authors wish to thank
+Mohamed Boucadair,
+Gorry Fairhurst,
+Bryan Ford,
+David Hayes,
+Alfred Hines,
+Karen E. E. Nielsen,
+Henning Peters,
+Maksim Proshin,
+Timo Voelker,
+Dan Wing,
+and Qiaobing Xie
+for their invaluable comments.</t>
+<t>In addition, the authors wish to thank David Hayes, Jason But, and Grenville Armitage,
+the authors of <xref target='DOI_10.1145_1496091.1496095'/>, for their suggestions.</t>
+<t>The authors also wish to thank Mohamed Boucadair for contributing the
+text related to the YANG module.</t>
+</section>
+
 </back>
 </rfc>
