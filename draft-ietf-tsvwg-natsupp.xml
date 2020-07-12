@@ -16,12 +16,6 @@
 <!--
 * ToDo:
 *
-* Translate:
-* Private Address  -> Internal Address
-* External Address -> Remote Address
-* External Port    -> Remote Port
-* External VTag    -> Remote VTag
-* Public Address   -> External Address
 * Address Maxims comments from 19.11.2019 on TSVWG
 -->
 <front>
@@ -102,13 +96,13 @@ provides a reliable communications channel between two end-hosts in many
 ways similar to TCP <xref target='RFC0793'/>. With the widespread
 deployment of Network Address Translators (NAT), specialized code has been
 added to NAT for TCP that allows multiple hosts to reside behind a NAT
-using private addresses (see <xref target='RFC6890'/>) and yet share
+using internal addresses (see <xref target='RFC6890'/>) and yet share
 single IPv4 address, even when two hosts (behind a NAT) choose the same port
 numbers for their connection.
 This additional code is sometimes classified as Network Address and Port
 Translation (NAPT).
 Please note that this document focuses on the case where the NAT maps a single
-or multiple private addresses to a single public address and vice versa.
+or multiple internal addresses to a single external address and vice versa.
 To date, specialized code for SCTP has not yet been
 added to most NAT devices so that only a translation of IP addresses is
 supported.
@@ -128,7 +122,7 @@ without the NAT needing to change port numbers.</t>
 reasons:</t>
 <ul>
 <li>It is desirable for SCTP internal end-hosts on multiple platforms to be able
-to share a NAT's public IP address in the same way that a TCP session can use a
+to share a NAT's external IP address in the same way that a TCP session can use a
 NAT.</li>
 <li><t>If a NAT does not need to change any data within an SCTP packet it
 will reduce the processing burden of NAT'ing SCTP by not
@@ -140,14 +134,14 @@ messages in NAT devices easier.</t></li>
 appropriate SCTP packet formats.</t>
 <t>When considering this feature it is possible to have
 multiple levels of support. At each level, the Internal
-Host, External Host and NAT may or may not support the
+Host, Remote Host and NAT may or may not support the
 features described in this document. The following table
 illustrates the results of the various combinations of
 support and if communications can occur between two endpoints.</t>
 <table anchor="communication_table" align="center">
 <name>Communication possibilities</name>
 <thead>
-<tr><th align="center">Internal Host</th> <th align="center">NAT Device</th> <th align="center">External Host</th> <th align="center">Communication</th></tr>
+<tr><th align="center">Internal Host</th> <th align="center">NAT Device</th> <th align="center">Remote Host</th> <th align="center">Communication</th></tr>
 </thead>
 <tbody>
 <tr><td align="center">Support      </td> <td align="center">Support   </td> <td align="center">Support      </td> <td align="center">Yes          </td></tr>
@@ -187,42 +181,42 @@ and only when, they appear in all capitals, as shown here.</t>
 <xref target='terminology_fig'/>. Familiarity with the terminology used in
 <xref target='RFC4960'/> and <xref target='RFC5061'/> is assumed.</t>
 <dl newline="true">
-<dt>Private-Address (Priv-Addr)</dt>
-<dd><t>The private address that is known to the internal host.</t></dd>
+<dt>Internal-Address (Int-Addr)</dt>
+<dd><t>The internal address that is known to the internal host.</t></dd>
 <dt>Internal-Port (Int-Port)</dt>
 <dd><t>The port number that is in use by the host holding the
-Private-Address.</t></dd>
+Internal-Address.</t></dd>
 <dt>Internal-VTag (Int-VTag)</dt>
 <dd><t>The SCTP Verification Tag (VTag) (see Section 3.1 of
 <xref target='RFC4960'/>) that the internal host has chosen for its
 communication.
 The VTag is a unique 32-bit tag that must accompany any incoming SCTP packet
-for this association to the Private-Address.</t></dd>
-<dt>External-Address (Ext-Addr)</dt>
+for this association to the Internal-Address.</t></dd>
+<dt>Remote-Address (Rem-Addr)</dt>
 <dd><t>The address that an internal host is attempting to contact.</t></dd>
-<dt>External-Port (Ext-Port)</dt>
-<dd><t>The port number of the peer process at the External-Address.</t></dd>
-<dt>External-VTag (Ext-VTag)</dt>
-<dd><t>The Verification Tag that the host holding the External-Address has
+<dt>Remote-Port (Rem-Port)</dt>
+<dd><t>The port number of the peer process at the Remote-Address.</t></dd>
+<dt>Remote-VTag (Rem-VTag)</dt>
+<dd><t>The Verification Tag that the host holding the Remote-Address has
 chosen for its communication.
 The VTag is a unique 32-bit tag that must accompany any incoming
-SCTP packet for this association to the External-Address.</t></dd>
-<dt>Public-Address (Pub-Addr)</dt>
-<dd><t>The public address assigned to the NAT device that it uses as a source
-address when sending packets towards the External-Address.</t></dd>
+SCTP packet for this association to the Remote-Address.</t></dd>
+<dt>External-Address (Ext-Addr)</dt>
+<dd><t>The external address assigned to the NAT device that it uses as a source
+address when sending packets towards the Remote-Address.</t></dd>
 </dl>
 <figure anchor='terminology_fig'>
 <name>Basic network setup</name>
 <artwork align="center">
   Internal Network    |         External Network
                       |
-           Private    |   Public               External
+           Internal   |   External              Remote
 +--------+ Address    |   Address  /--\/--\    Address +--------+
 |  SCTP  |         +-----+        /        \           |  SCTP  |
 |endpoint|=========| NAT |=======| Internet |==========|endpoint|
 |    A   |         +-----+        \        /           |    B   |
-+--------+ Internal   |            \--/\--/    External+--------+
- Internal     Port    |                            Port  External
++--------+ Internal   |            \--/\--/      Remote+--------+
+ Internal     Port    |                            Port    Remote
    VTag               |                                      VTag
 </artwork>
 </figure>
@@ -339,16 +333,16 @@ Therefore an SCTP variant of NAT has been developed.</t>
 <section>
 <name>The SCTP-Specific Variant of NAT</name>
 <t>In this section it is allowed that there are multiple SCTP capable hosts
-behind a NAT that has one Public-Address. Furthermore this section
+behind a NAT that has one Exernal-Address. Furthermore this section
 focuses on the single point traversal scenario.</t>
 
 <t>The modification of SCTP packets sent to the Internet is
 simple: the source address of the packet has to be replaced with the
-Public-Address. It may also be necessary to establish some
+External-Address. It may also be necessary to establish some
 state in the NAT device to later handle incoming packets.</t>
 
 <t>For the SCTP NAT processing the NAT device has to maintain a NAT binding table
-of Internal-VTag, Internal-Port, External-VTag, External-Port, Private-Address,
+of Internal-VTag, Internal-Port, Remote-VTag, Remote-Port, Internal-Address,
 and whether the restart procedure is disabled or not.
 An entry in that NAT binding table is called a NAT state control block.
 The function Create() obtains the just mentioned parameters and returns
@@ -357,20 +351,20 @@ A NAT device MAY allow creating NAT-State control blocks via a management
 interface.</t>
 
 <t>For SCTP packets coming from the public Internet the destination
-address of the packets has to be replaced with the Private-Address
+address of the packets has to be replaced with the Internal-Address
 of the host the packet has to be delivered to. The lookup of the
-Private-Address is based on the External-VTag, External-Port,
+Internal-Address is based on the Remote-VTag, Remote-Port,
 Internal-VTag and the Internal-Port.</t>
 
 <t>The entries in the NAT binding table need to fulfill some uniqueness conditions.
 There must not be more than one entry NAT binding table with the same pair of
-Internal-Port and External-Port.
+Internal-Port and Remote-Port.
 This rule can be relaxed, if all NAT binding table entries with the same
-Internal-Port and External-Port have the support for the restart
+Internal-Port and Remote-Port have the support for the restart
 procedure enabled.
 In this case there must be no more than one entry with the same Internal-Port,
-External-Port and Ext-VTag and no more than one NAT binding table entry with
-the same Internal-Port, External-Port and Int-VTag.</t>
+Remote-Port and Remote-VTag and no more than one NAT binding table entry with
+the same Internal-Port, Remote-Port and Int-VTag.</t>
 
 <t>The processing of outgoing SCTP packets containing an INIT chunk
 is described in the following figure. The scenario shown is valid for all
@@ -385,24 +379,24 @@ message flows in this section.</t>
 
 
              INIT[Initiate-Tag]
-Priv-Addr:Int-Port ------> Ext-Addr:Ext-Port
-                  Ext-VTag=0
+ Int-Addr:Int-Port ------> Rem-Addr:Rem-Port
+                  Rem-VTag=0
 
-             Create(Initiate-Tag, Int-Port, 0, Ext-Port, Priv-Addr,
+             Create(Initiate-Tag, Int-Port, 0, Rem-Port, Int-Addr,
                     RestartSupported)
              Returns(NAT-State control block)
 
            Translate To:
 
                         INIT[Initiate-Tag]
-           Pub-Addr:Int-Port ------> Ext-Addr:Ext-Port
-                            Ext-VTag=0
+           Ext-Addr:Int-Port ------> Rem-Addr:Rem-Port
+                            Rem-VTag=0
 ]]>
 </artwork>
 <t>Normally a NAT binding table entry will be created.</t>
 <t>However, it is possible that there is already a NAT binding table entry with the
-same External-Port, Internal-Port, and Internal-VTag
-but different Private-Address.
+same Remote-Port, Internal-Port, and Internal-VTag
+but different Internal-Address.
 In this case the INIT MUST be dropped by the NAT and an ABORT MUST be
 sent back to the SCTP host with the M-Bit set and an appropriate error
 cause (see <xref target='mbitabort'/> for the format).
@@ -411,9 +405,9 @@ destination address of the packet containing the INIT chunk.</t>
 <t>If an outgoing SCTP packet contains an INIT or ASCONF chunk and a matching
 NAT binding table entry is found, the packet is processed as a normal
 outgoing packet.</t>
-<t>It is also possible that a connection to External-Address and External-Port
+<t>It is also possible that a connection to Remote-Address and Remote-Port
 exists without an Internal-VTag conflict but there exists a NAT binding
-table entry with the same port numbers but a different Private-Address.
+table entry with the same port numbers but a different Internal-Address.
 In such a case the INIT MUST be dropped by the NAT and an ABORT SHOULD be
 sent back to the SCTP host with the M-Bit set and an appropriate error
 cause (see <xref target='mbitabort'/> for the format).</t>
@@ -427,21 +421,21 @@ is described in the following figure.</t>
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
 
-Priv-Addr:Int-Port ------> Ext-Addr:Ext-Port
-                  Ext-VTag
+Int-Addr:Int-Port ------> Rem-Addr:Rem-Port 
+                  Rem-VTag
 
 
                           Translate To:
 
-                          Pub-Addr:Int-Port ------> Ext-Addr:Ext-Port
-                                           Ext-VTag
+                          Ext-Addr:Int-Port ------> Rem-Addr:Rem-Port
+                                           Rem-VTag
 ]]>
 </artwork>
 <t>The processing of incoming SCTP packets containing an INIT ACK chunk
 is described in the following figure. The Lookup() function getting as
-input the Internal-VTag, Internal-Port, External-VTag, and External-Port,
+input the Internal-VTag, Internal-Port, Remote-VTag, and Remote-Port,
 returns the corresponding entry of the NAT binding table
-and updates the External-VTag by substituting it with the value of the
+and updates the Remote-VTag by substituting it with the value of the
 Initiate-Tag of the INIT ACK chunk. The wildcard character signifies that
 the parameter's value is not considered in the Lookup() function
 or changed in the Update() function, respectively.</t>
@@ -454,21 +448,21 @@ or changed in the Update() function, respectively.</t>
                                        \--/\---/
 
                                          INIT ACK[Initiate-Tag]
-                            Pub-Addr:Int-Port <---- Ext-Addr:Ext-Port
+                            Ext-Addr:Int-Port <---- Rem-Addr:Rem-Port
                                              Int-VTag
 
-         Lookup(Int-VTag, Int-Port, *, Ext-Port)
+         Lookup(Int-VTag, Int-Port, *, Rem-Port)
          Update(*, *, Initiate-Tag, *)
 
-         Returns(NAT-State control block containing Priv-Addr)
+         Returns(NAT-State control block containing Int-Addr)
 
                INIT ACK[Initiate-Tag]
-Priv-Addr:Int-Port <------ Ext-Addr:Ext-Port
+ Int-Addr:Int-Port <------ Rem-Addr:Rem-Port
                    Int-VTag
 ]]>
 </artwork>
 <t>In the case Lookup fails, the SCTP packet is dropped.
-If it succeeds, the Update routine inserts the External-VTag
+If it succeeds, the Update routine inserts the Remote-VTag
 (the Initiate-Tag of the INIT ACK chunk) in the NAT state control block.</t>
 
 <t>The processing of incoming SCTP packets containing an ABORT or
@@ -482,23 +476,23 @@ following figure.</t>
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
 
-                          Pub-Addr:Int-Port <------ Ext-Addr:Ext-Port
-                                            Ext-VTag
+                          Ext-Addr:Int-Port <------ Rem-Addr:Rem-Port
+                                            Rem-VTag
 
-         Lookup(*, Int-Port, Ext-VTag, Ext-Port)
+         Lookup(*, Int-Port, Rem-VTag, Rem-Port)
 
-         Returns(NAT-State control block containing Priv-Addr)
+         Returns(NAT-State control block containing Int-Addr)
 
-Priv-Addr:Int-Port <------ Ext-Addr:Ext-Port
-                   Ext-VTag
+ Int-Addr:Int-Port <------ Rem-Addr:Rem-Port
+                   Rem-VTag
 ]]>
 </artwork>
 <t>For an incoming packet containing an INIT chunk a table lookup is made
 only based on the addresses and port numbers.
-If an entry with an External-VTag of zero is found, it is considered a
-match and the External-VTag is updated.
-If an entry with a non-matching External-VTag is found or no entry is found,
-the incoming packet is dropped. If an entry with a matching External-VTag
+If an entry with an Remote-VTag of zero is found, it is considered a
+match and the Remote-VTag is updated.
+If an entry with a non-matching Remote-VTag is found or no entry is found,
+the incoming packet is dropped. If an entry with a matching Remote-VTag
 is found, the incoming packet is forwarded.
 This allows the handling of INIT collision through NAT.</t>
 <t>The processing of other incoming SCTP packets is described in the
@@ -511,14 +505,14 @@ following figure.</t>
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
 
-                          Pub-Addr:Int-Port <------ Ext-Addr:Ext-Port
+                          Ext-Addr:Int-Port <------ Rem-Addr:Rem-Port
                                             Int-VTag
 
-         Lookup(Int-VTag, Int-Port, *, Ext-Port)
+         Lookup(Int-VTag, Int-Port, *, Rem-Port)
 
-         Returns(NAT-State control block containing Private-Address)
+         Returns(NAT-State control block containing Internal-Address)
 
-Priv-Addr:Int-Port <------ Ext-Addr:Ext-Port
+ Int-Addr:Int-Port <------ Rem-Addr:Rem-Port
                    Int-VTag
 ]]>
 </artwork>
@@ -715,7 +709,7 @@ MUST NOT appear in any other chunk.</t>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                   Internal Verification Tag                   |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                   External Verification Tag                   |
+|                    Remote Verification Tag                    |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
 
@@ -736,12 +730,12 @@ for. Note that the receiver MUST NOT change this 32-bit value.</t></dd>
 <dt>Internal Verification Tag: 4 bytes (unsigned integer)</dt>
 <dd><t>The Verification Tag that the internal host has chosen for its communication.
 The Verification Tag is a unique 32-bit tag that must accompany
-any incoming SCTP packet for this association to the Private-Address.</t></dd>
-<dt>External Verification Tag: 4 bytes (unsigned integer)</dt>
-<dd><t>The Verification Tag that the host holding the External-Address has
+any incoming SCTP packet for this association to the Internal-Address.</t></dd>
+<dt>Remote Verification Tag: 4 bytes (unsigned integer)</dt>
+<dd><t>The Verification Tag that the host holding the Remote-Address has
 chosen for its communication. The VTag is a unique 32-bit tag
 that must accompany any incoming SCTP packet for this
-association to the External-Address.</t></dd>
+association to the Remote-Address.</t></dd>
 </dl>
 <t>[NOTE to RFC-Editor: Assignment of parameter type to be confirmed by IANA.]</t>
 <t>This parameter MAY appear in ASCONF chunks and MUST NOT appear in
@@ -783,7 +777,7 @@ allows multi-homed SCTP endpoints to exchange its IP-addresses by using
 IPv4 or IPv6 address parameters in the INIT and INIT ACK chunks.
 However, this doesn't work when NAT devices are present.</t>
 <t>Every association setup from a host behind a NAT MUST NOT use multiple
-private addresses.
+internal addresses.
 There MUST NOT be any IPv4 Address parameter, IPv6 Address parameter, or Supported
 Address Types parameter in the INIT chunk. The INIT ACK chunk MUST NOT
 contain any IPv4 Address parameter or IPv6 Address parameter using non-global
@@ -798,9 +792,9 @@ defined in <xref target='disrestart'/>.</t>
 
 <section anchor='mbitport'>
 <name>Handling of Internal Port Number and Verification Tag Collisions</name>
-<t>Consider the case where two hosts in the Private-Address space want to
+<t>Consider the case where two hosts in the Internal-Address space want to
 set up an SCTP association with the same service provided by some hosts
-in the Internet. This means that the External-Port is the same.
+in the Internet. This means that the Remote-Port is the same.
 If they both choose the same Internal-Port and Internal-VTag, the
 NAT device cannot distinguish between incoming packets anymore.
 But this is very unlikely.
@@ -810,7 +804,7 @@ random number that has to match.
 A NAPT device can control the 16-bit Natted Port and therefore avoid collisions
 deterministically.</t>
 
-<t>The same can happen with the External-VTag when an INIT ACK chunk or
+<t>The same can happen with the Remote-VTag when an INIT ACK chunk or
 an ASCONF chunk is processed by the NAT.</t>
 
 <section>
@@ -850,7 +844,7 @@ M bit set, MUST stop adding the path to the association.</t>
 <section anchor='collision'>
 <name>Handling of Internal Port Number Collisions</name>
 <t>When two SCTP hosts are behind an SCTP-aware NAT it is possible that two
-SCTP hosts in the Private-Address space will want to set up an
+SCTP hosts in the Internal-Address space will want to set up an
 SCTP association with the same server running on the same host in the Internet.
 If the two hosts choose the same internal port, this is considered an
 internal port number collision.</t>
@@ -864,7 +858,7 @@ This note is used when establishing future associations (i.e. when processing
 an INIT from an internal host) to decide if the connection should be allowed.
 The NAT device does the following when processing an INIT:</t>
 <ul>
-<li><t>If the INIT is originating from an internal port to an external port for
+<li><t>If the INIT is originating from an internal port to an remote port for
 which the NAT device has no matching NAT binding table entry,
 it MUST allow the INIT creating an NAT binding table
 entry.</t></li>
@@ -882,8 +876,8 @@ response to the ASCONF chunk.</t>
 </section>
 <section>
 <name>Endpoint Considerations</name>
-<t>For the external SCTP server on the Internet this means that the
-External-Port and the External-Address are the same.
+<t>For the remote SCTP server on the Internet this means that the
+Remote-Port and the Remote-Address are the same.
 If they both have chosen the same Internal-Port the server cannot distinguish
 between both associations based on the address and port numbers.
 For the server it looks like the association is being restarted.
@@ -916,7 +910,7 @@ Such a packet containing an ERROR chunk SHOULD NOT
 be sent if the received packet contains an ABORT, SHUTDOWN COMPLETE
 or INIT ACK chunk. An ERROR chunk MUST NOT be sent if the received
 packet contains an ERROR chunk with the M bit set.
-In any case, the packet SHOULD NOT be forwarded to the external address.</t>
+In any case, the packet SHOULD NOT be forwarded to the remote address.</t>
 <t>When sending the ERROR chunk, the error cause 'Missing State'
 (see <xref target='miss_state'/>) MUST be included and the M bit of
 the ERROR chunk MUST be set (see <xref target='mbiterr'/>).</t>
@@ -1021,7 +1015,7 @@ include the flag indicating whether the restart procedure is supported or not.
 This flag is not relevant for these examples.</t>
 <section>
 <name>Single-homed Client to Single-homed Server</name>
-<t>The internal client starts the association with the external
+<t>The internal client starts the association with the remote
 server via a four-way-handshake. Host A starts by sending an
 INIT chunk.</t>
 <artwork align="center">
@@ -1032,13 +1026,13 @@ INIT chunk.</t>
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
        +---------+--------+----------+--------+-----------+
-NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT    |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
 
    INIT[Initiate-Tag = 1234]
 10.0.0.1:1 ------> 203.0.113.1:2
-        Ext-VTtag = 0
+        Rem-VTtag = 0
 ]]>
 </artwork>
 <t>A NAT binding tabled entry is created, the source address is substituted and the
@@ -1047,7 +1041,7 @@ packet is sent on:</t>
 <![CDATA[
        NAT creates entry:
        +---------+--------+----------+--------+-----------+
-NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT    |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
        |  1234   |    1   |     0    |    2   |  10.0.0.1 |
@@ -1055,11 +1049,11 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
                                 INIT[Initiate-Tag = 1234]
                   192.0.2.1:1 ------------------------> 203.0.113.1:2
-                                        Ext-VTtag = 0
+                                        Rem-VTtag = 0
 ]]>
 </artwork>
-<t>Host B receives the INIT and sends an INIT ACK with the NAT's external
-address as destination address.</t>
+<t>Host B receives the INIT and sends an INIT ACK with the NAT's Remote-address
+as destination address.</t>
 <artwork align="center">
 <![CDATA[
                                        /--\/--\
@@ -1074,7 +1068,7 @@ address as destination address.</t>
 
 NAT updates entry:
        +---------+--------+----------+--------+-----------+
-NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT    |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
        |  1234   |    1   |    5678  |    2   |  10.0.0.1 |
@@ -1097,11 +1091,11 @@ INIT ACK[Initiate-Tag = 5678]
 
          COOKIE ECHO
 10.0.0.1:1 ------> 203.0.113.1:2
-       Ext-VTag = 5678
+       Rem-VTag = 5678
 
                                       COOKIE ECHO
                    192.0.2.1:1 -----------------------> 203.0.113.1:2
-                                    Ext-VTag = 5678
+                                    Rem-VTag = 5678
 
 
                                        COOKIE ACK
@@ -1117,7 +1111,7 @@ INIT ACK[Initiate-Tag = 5678]
 
 <section>
 <name>Single-homed Client to Multi-homed Server</name>
-<t>The internal client is single-homed whereas the external server is
+<t>The internal client is single-homed whereas the remote server is
 multi-homed. The client (Host A) sends an INIT like in the single-homed case.
 </t>
 <artwork align="center">
@@ -1131,21 +1125,21 @@ multi-homed. The client (Host A) sends an INIT like in the single-homed case.
                                                +--------+
 
        +---------+--------+----------+--------+-----------+
-NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT    |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
 
 
  INIT[Initiate-Tag = 1234]
 10.0.0.1:1 ---> 203.0.113.1:2
-       Ext-VTag = 0
+       Rem-VTag = 0
 ]]>
 </artwork>
 <t>NAT creates entry:</t>
 <artwork align="center">
 <![CDATA[
        +---------+--------+----------+--------+-----------+
-NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT    |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
        |  1234   |    1   |     0    |    2   |  10.0.0.1 |
@@ -1153,7 +1147,7 @@ NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
                              INIT[Initiate-Tag = 1234]
                 192.0.2.1:1 --------------------------> 203.0.113.1:2
-                                  Ext-VTag = 0
+                                  Rem-VTag = 0
 ]]>
 </artwork>
 <t>The server (Host B) includes its two addresses in the INIT ACK chunk.</t>
@@ -1177,7 +1171,7 @@ address:</t>
 <artwork align="center">
 <![CDATA[
        +---------+--------+----------+--------+-----------+
-NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT    |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
        |  1234   |    1   |    5678  |    2   |  10.0.0.1 |
@@ -1202,11 +1196,11 @@ INIT ACK[Initiate-Tag = 5678]
 
        COOKIE ECHO
 10.0.0.1:1 ---> 203.0.113.1:2
-       ExtVTag = 5678
+       Rem-VTag = 5678
 
                                    COOKIE ECHO
                 192.0.2.1:1 --------------------------> 203.0.113.1:2
-                                  Ext-VTag = 5678
+                                  Rem-VTag = 5678
 
 
                                      COOKIE ACK
@@ -1237,20 +1231,20 @@ include the second address.</t>
                +-------+
 
        +---------+--------+----------+--------+-----------+
-NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT 1  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
 
  INIT[Initiate-Tag = 1234]
 10.0.0.1:1 --------> 203.0.113.1:2
-         Ext-VTag = 0
+         Rem-VTag = 0
 ]]>
 </artwork>
 <t>NAT 1 creates entry:</t>
 <artwork align="center">
 <![CDATA[
        +---------+--------+----------+--------+-----------+
-NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT 1  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
        |  1234   |    1   |     0    |    2   |  10.0.0.1 |
@@ -1259,7 +1253,7 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
                                 INIT[Initiate-Tag = 1234]
                      192.0.2.1:1 ---------------------> 203.0.113.1:2
-                                        ExtVTag = 0
+                                        Rem-VTag = 0
 ]]>
 </artwork>
 <t>Host B includes its second address in the INIT ACK.</t>
@@ -1282,7 +1276,7 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 <artwork align="center">
 <![CDATA[
        +---------+--------+----------+--------+-----------+
-NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT 1  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
        |  1234   |    1   |    5678  |    2   |  10.0.0.1 |
@@ -1307,11 +1301,11 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
           COOKIE ECHO
 10.0.0.1:1 --------> 203.0.113.1:2
-          Ext-VTag = 5678
+          Rem-VTag = 5678
 
                                         COOKIE ECHO
                         192.0.2.1:1 ------------------> 203.0.113.1:2
-                                      Ext-VTag = 5678
+                                      Rem-VTag = 5678
 
 
                                         COOKIE ACK
@@ -1327,7 +1321,7 @@ NAT 1  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 The address parameter contains an undefined address (0) to indicate that
 the source address should be added.
 The lookup address parameter within the ASCONF chunk will also contain
-the pair of VTags (external and internal) so that the NAT may populate
+the pair of VTags (remote and internal) so that the NAT may populate
 its NAT binding table entry completely with this single packet.</t>
 <artwork align="center">
 <![CDATA[
@@ -1339,25 +1333,25 @@ its NAT binding table entry completely with this single packet.</t>
 +------+    \--------| NAT 2 |--------/       \--/\--/
                      +-------+
 
-ASCONF [ADD-IP=0.0.0.0, INT-VTag=1234, Ext-VTag = 5678]
+ASCONF [ADD-IP=0.0.0.0, INT-VTag=1234, Rem-VTag = 5678]
 10.1.0.1:1 --------> 203.0.113.129:2
-         Ext-VTag = 5678
+         Rem-VTag = 5678
 ]]>
 </artwork>
 <t>NAT 2 creates a complete entry:</t>
 <artwork align="center">
 <![CDATA[
        +---------+--------+----------+--------+-----------+
-NAT 2  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT 2  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
        |  1234   |    1   |    5678  |    2   |  10.1.0.1 |
        +---------+--------+----------+--------+-----------+
 
 
-                  ASCONF [ADD-IP, Int-VTag=1234, Ext-VTag = 5678]
+                  ASCONF [ADD-IP, Int-VTag=1234, Rem-VTag = 5678]
                    192.0.2.129:1 -------------------> 203.0.113.129:2
-                                     Ext-VTag = 5678
+                                     Rem-VTag = 5678
 
                                         ASCONF ACK
                    192.0.2.129:1 <------------------- 203.0.113.129:2
@@ -1372,7 +1366,7 @@ NAT 2  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 <section>
 <name>NAT Loses Its State</name>
 <t>Association is already established between Host A and Host B, when the NAT
-loses its state and obtains a new public address. Host A sends a DATA chunk
+loses its state and obtains a new external address. Host A sends a DATA chunk
 to Host B.</t>
 <artwork align="center">
 <![CDATA[
@@ -1383,13 +1377,13 @@ to Host B.</t>
                                          \--/\--/
 
        +---------+--------+----------+--------+-----------+
-NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT    |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
 
                DATA
 10.0.0.1:1 ----------> 203.0.113.1:2
-            Ext-VTag = 5678
+            Rem-VTag = 5678
 ]]>
 </artwork>
 <t>The NAT device cannot find an entry in the NAT binding table for the association.
@@ -1405,7 +1399,7 @@ It sends ERROR an message with the M-Bit set and the cause
 
   ERROR [M-Bit, NAT state missing]
 10.0.0.1:1 <---------- 203.0.113.1:2
-          Ext-VTag = 5678
+          Rem-VTag = 5678
 ]]>
 </artwork>
 <t>On reception of the ERROR message, Host A sends an ASCONF chunk indicating
@@ -1419,20 +1413,20 @@ actual packet added.</t>
 +--------+              +-----+         \        /         +--------+
                                          \--/\--/
 
-ASCONF [ADD-IP, DELETE-IP, Int-VTag=1234, Ext-VTag = 5678]
+ASCONF [ADD-IP, DELETE-IP, Int-VTag=1234, Rem-VTag = 5678]
 10.0.0.1:1 ----------> 203.0.113.129:2
-          Ext-VTag = 5678
+          Rem-VTag = 5678
 
        +---------+--------+----------+--------+-----------+
-NAT    |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT    |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
        |  1234   |    1   |    5678  |    2   |  10.0.0.1 |
        +---------+--------+----------+--------+-----------+
 
-        ASCONF [ADD-IP, DELETE-IP, Int-VTag=1234, Ext-VTag = 5678]
+        ASCONF [ADD-IP, DELETE-IP, Int-VTag=1234, Rem-VTag = 5678]
                        192.0.2.2:1 -----------------> 203.0.113.129:2
-                                     Ext-VTag = 5678
+                                     Rem-VTag = 5678
 ]]>
 </artwork>
 <t>Host B adds the new source address to this association and deletes
@@ -1455,24 +1449,24 @@ all other addresses from this association.</t>
 
               DATA
 10.0.0.1:1 ----------> 203.0.113.1:2
-         Ext-VTag = 5678
+         Rem-VTag = 5678
                                           DATA
                        192.0.2.2:1 -----------------> 203.0.113.129:2
-                                     Ext-VTag = 5678
+                                     Rem-VTag = 5678
 ]]>
 </artwork>
 </section>
 <section>
 <name>Peer-to-Peer Communication</name>
 <t>If two hosts are behind NAT devices and want to communicate with each other,
-they have to get knowledge of the peer's public address.
+they have to get knowledge of the peer's external address.
 This can be achieved with a so-called rendezvous server.
-Afterwards the destination addresses are public,
+Afterwards the destination addresses are external,
 and the association is set up with the help of the INIT collision.
 The NAT devices create their entries according to their internal peer's
 point of view. Therefore, NAT A's Internal-VTag and Internal-Port are
-NAT B's External-VTag and External-Port, respectively.
-The naming (internal/external) of the verification tag in the packet
+NAT B's Remote-VTag and Remote-Port, respectively.
+The naming (internal/remote) of the verification tag in the packet
 flow is done from the sending host's point of view.</t>
 <artwork align="center">
 <![CDATA[
@@ -1487,25 +1481,25 @@ flow is done from the sending host's point of view.</t>
 
 NAT Binding Tables
        +---------+--------+----------+--------+-----------+
-NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT A  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
 
        +---------+--------+----------+--------+-----------+
-NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT B  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  v-tag  |  port  |   v-tag  |   port |    Addr   |
        +---------+--------+----------+--------+-----------+
 
 INIT[Initiate-Tag = 1234]
 10.0.0.1:1 --> 203.0.113.1:2
-        Ext-VTag = 0
+        Rem-VTag = 0
 ]]>
 </artwork>
 <t>NAT A creates entry:</t>
 <artwork align="center">
 <![CDATA[
        +---------+--------+----------+--------+-----------+
-NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT A  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
        |  1234   |    1   |     0    |    2   |  10.0.0.1 |
@@ -1513,14 +1507,14 @@ NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
                         INIT[Initiate-Tag = 1234]
                192.0.2.1:1 ----------------> 203.0.113.1:2
-                            Ext-VTag = 0
+                            Rem-VTag = 0
 ]]>
 </artwork>
 <t>NAT B processes INIT, but cannot find an entry. The SCTP packet is
 silently discarded and leaves the NAT binding table of NAT B unchanged.</t>
 <artwork align="center">
        +---------+--------+----------+--------+-----------+
-NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT B  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
 </artwork>
@@ -1538,18 +1532,18 @@ are used to create an entry.</t>
 
                                             INIT[Initiate-Tag = 5678]
                                            192.0.2.1:1 <-- 10.1.0.1:2
-                                                         Ext-VTag = 0
+                                                         Rem-VTag = 0
 
-       +---------+--------+-----------+----------+--------+
-NAT B  |  Int    |  Int   |    Priv   |   Ext    |   Ext  |
-       |  VTag   |  Port  |    Addr   |   VTag   |   Port |
-       +---------+--------+-----------+----------+--------+
-       |  5678   |    2   |  10.1.0.1 |     0    |    1   |
-       +---------+--------+-----------+----------+--------+
+       +---------+--------+----------+--------+-----------+
+NAT B  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
+       |  VTag   |  Port  |   VTag   |   Port |    Addr   |
+       +---------+--------+----------+--------+-----------+
+       |  5678   |    2   |     0    |    1   |  10.1.0.1 |
+       +---------+--------+----------+--------+-----------+
 
                           INIT[Initiate-Tag = 5678]
                192.0.2.1:1  <--------------- 203.0.113.1:2
-                                  Ext-VTag = 0
+                                  Rem-VTag = 0
 ]]>
 </artwork>
 <t>NAT A processes INIT. As the outgoing INIT of Host A has already created
@@ -1564,9 +1558,9 @@ an entry, the entry is found and updated:</t>
 +--------+     +-------+     \         /     +-------+     +--------+
                    |          \--/\---/          |
 
-               VTag != Int-VTag, but Ext-VTag == 0, find entry.
+               VTag != Int-VTag, but Rem-VTag == 0, find entry.
        +---------+--------+----------+--------+-----------+
-NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT A  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
        |   1234  |   1    |   5678   |    2   |  10.0.0.1 |
@@ -1574,7 +1568,7 @@ NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
  INIT[Initiate-tag = 5678]
 10.0.0.1:1 <-- 203.0.113.1:2
-          Ext-VTag = 0
+          Rem-VTag = 0
 ]]>
 </artwork>
 <t>Host A sends INIT ACK, which can pass through NAT B:</t>
@@ -1590,17 +1584,17 @@ NAT A  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
 INIT ACK[Initiate-Tag = 1234]
 10.0.0.1:1 --> 203.0.113.1:2
-      Ext-VTag = 5678
+      Rem-VTag = 5678
 
 
                     INIT ACK[Initiate-Tag = 1234]
                192.0.2.1:1 ----------------> 203.0.113.1:2
-                             Ext-VTag = 5678
+                             Rem-VTag = 5678
 
                                              NAT B updates entry:
 
        +---------+--------+----------+--------+-----------+
-NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
+NAT B  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
        |  VTag   |  Port  |   VTag   |   Port |    Addr   |
        +---------+--------+----------+--------+-----------+
        |  5678   |    2   |   1234   |   1    |  10.1.0.1 |
@@ -1608,7 +1602,7 @@ NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
                                         INIT ACK[Initiate-Tag = 1234]
                                            192.0.2.1:1 --> 10.1.0.1:2
-                                                      Ext-VTag = 5678
+                                                      Rem-VTag = 5678
 ]]>
 </artwork>
 <t>The lookup for COOKIE ECHO and COOKIE ACK is successful.</t>
@@ -1624,27 +1618,27 @@ NAT B  |  Int    |  Int   |   Ext    |   Ext  |    Priv   |
 
                                                   COOKIE ECHO
                                            192.0.2.1:1 <-- 10.1.0.1:2
-                                                Ext-VTag = 1234
+                                                Rem-VTag = 1234
 
                               COOKIE ECHO
                192.0.2.1:1 <------------- 203.0.113.1:2
-                              Ext-VTag = 1234
+                              Rem-VTag = 1234
 
        COOKIE ECHO
 10.0.0.1:1 <-- 203.0.113.1:2
-       Ext-VTag = 1234
+       Rem-VTag = 1234
 
        COOKIE ACK
 10.0.0.1:1 --> 203.0.113.1:2
-       Ext-VTag = 5678
+       Rem-VTag = 5678
 
                               COOKIE ACK
                192.0.2.1:1 ----------------> 203.0.113.1:2
-                              Ext-VTag = 5678
+                              Rem-VTag = 5678
 
                                                     COOKIE ACK
                                            192.0.2.1:1 --> 10.1.0.1:2
-                                                 Ext-VTag = 5678
+                                                 Rem-VTag = 5678
 ]]>
 </artwork>
 </section>
@@ -1676,7 +1670,7 @@ module: ietf-nat-sctp
   augment /nat:nat/nat:instances/nat:instance
          /nat:mapping-table/nat:mapping-entry:
     +--rw int-VTag?   uint32 {sctp-nat}?
-    +--rw ext-VTag?   uint32 {sctp-nat}?
+    +--rw rem-VTag?   uint32 {sctp-nat}?
 ]]>
 </artwork>
 <t>Concretely, the SCTP NAT YANG module augments the NAT YANG module
@@ -1697,7 +1691,7 @@ These parameters apply only for SCTP NAT mapping entries (i.e.,
 MUST be set to '132');</t>
 <ul>
 <li><t>The Internal Verification Tag (Int-VTag)</t></li>
-<li><t>The External Verification Tag (Ext-VTag)</t></li>
+<li><t>The Remote Verification Tag (Rem-VTag)</t></li>
 </ul>
 </section>
 
@@ -1794,10 +1788,10 @@ module ietf-nat-sctp {
          "The Internal Verification Tag that the internal
           host has chosen for this communication.";
     }
-    leaf ext-VTag {
+    leaf rem-VTag {
       type uint32;
       description
-         "The External Verification Tag that the remote
+         "The Remote Verification Tag that the remote
           peer has chosen for this communication.";
     }
   }
