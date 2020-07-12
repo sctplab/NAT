@@ -16,6 +16,12 @@
 <!--
 * ToDo:
 *
+* Translate:
+* Private Address  -> Internal Address
+* External Address -> Remote Address
+* External Port    -> Remote Port
+* External VTag    -> Remote VTag
+* Public Address   -> External Address
 * Address Maxims comments from 19.11.2019 on TSVWG
 -->
 <front>
