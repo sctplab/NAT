@@ -1992,7 +1992,7 @@ association state can be cleaned up.</t>
 not add any additional security considerations to the ones given in
 <xref target='RFC4960'/>,
 <xref target='RFC4895'/>, and
-<xref target='RFC5061'/>.
+<xref target='RFC5061'/>.</t>
 <t>SCTP endpoints disabling the restart procedure, should monitor the status
 of all associations to mitigate resource exhaustion attacks by establishing
 a lot of associations sharing the same IP addresses and port numbers.</t>
