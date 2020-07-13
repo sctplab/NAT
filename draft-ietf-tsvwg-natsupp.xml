@@ -17,7 +17,7 @@
 <title abbrev='SCTP NAT Support'>
 Stream Control Transmission Protocol (SCTP) Network Address Translation Support
 </title>
-<seriesInfo name="Internet-Draft" value="draft-ietf-tsvwg-natsupp-17-to-be"/>
+<seriesInfo name="Internet-Draft" value="draft-ietf-tsvwg-natsupp-17"/>
 
 <!-- ************** RANDALL STEWART ***************-->
 <author initials='R. R.' surname='Stewart' fullname='Randall R. Stewart'>
