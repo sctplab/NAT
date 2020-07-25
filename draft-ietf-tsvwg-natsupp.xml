@@ -871,8 +871,8 @@ an NAT binding table entry.</t></li>
 <li><t>If the packet containing the INIT chunk matches an existing NAT binding
 table entry, it MUST validate that the disable restart feature is supported and,
 if it does, allow the packet containing the INIT chunk to be forwarded.</t></li>
-<li><t>If the disable restart feature is not supported, the NAT function MUST send
-a packet containing an ABORT chunk with the M bit set.</t></li>
+<li><t>If the disable restart feature is not supported, the NAT function SHOULD
+send a packet containing an ABORT chunk with the M bit set.</t></li>
 </ul>
 <t>The 'Port Number Collision' error cause (see <xref target='portcollide' />)
 MUST be included in the ABORT chunk sent in response to the packet containing
