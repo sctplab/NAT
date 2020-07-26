@@ -998,11 +998,12 @@ an SCTP association. For example, if the path MTU is reduced and there
 are still some DATA chunk in flight, which require packets larger than
 the new path MTU. If IP-level fragmentation can not be used, the SCTP
 association will be terminated in a non-graceful way.</t>
-<t>Therefore, a NAT function MUST support IP reassembly of received fragmented
+<t>Therefore, a NAT function MUST be able to handle IP-level fragmented
 SCTP packets. The fragments may arrive in any order.</t>
 <t>When an SCTP packet has to be fragmented by the NAT function and
-the IP header forbids fragmentation a corresponding ICMP packet SHOULD
-be sent. This allows for a faster recovery from this packet drop.</t>
+the IP header forbids fragmentation, the NAT MUST send back a corresponding
+ICMP message to the internal host.
+This allows for a faster recovery from this packet drop.</t>
 </section>
 
 <section anchor='multihomed'>
@@ -1990,14 +1991,16 @@ association state can be cleaned up.</t>
 <xref target='RFC6269' /> and apply to SCTP as well.</t>
 <t>For SCTP endpoints not disabling the restart procedure, this document does
 not add any additional security considerations to the ones given in
-<xref target='RFC4960'/>,
-<xref target='RFC4895'/>, and
-<xref target='RFC5061'/>.</t>
+<xref target="RFC4960" />,
+<xref target="RFC4895" />, and
+<xref target="RFC5061" />.</t>
 <t>SCTP endpoints disabling the restart procedure, should monitor the status
 of all associations to mitigate resource exhaustion attacks by establishing
 a lot of associations sharing the same IP addresses and port numbers.</t>
 <t>In any case, SCTP is protected by the verification tags and the usage of
 <xref target='RFC4895'/> against off-path attackers.</t>
+<t>For IP-level fragmentation and reassembly related issues see
+<xref target="RFC4963" />.</t>
 <t>The YANG module specified in this document defines a schema for data that is
 designed to be accessed via network management protocols such as
 NETCONF <xref target="RFC6241" /> or RESTCONF <xref target="RFC8040" />.
@@ -2048,6 +2051,7 @@ incoming SCTP packets.</t></li>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml-doi/reference.DOI.10.1145/1496091.1496095.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.0793.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3022.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4963.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6146.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6269.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6333.xml"/>
