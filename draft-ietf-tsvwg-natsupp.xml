@@ -10,7 +10,7 @@
      submissionType="IETF"
      consensus="true"
      category="std"
-     docName="draft-ietf-tsvwg-natsupp-18-to-be"
+     docName="draft-ietf-tsvwg-natsupp-19"
      version="3">
 
 <front>
@@ -1000,9 +1000,10 @@ the new path MTU. If IP-level fragmentation can not be used, the SCTP
 association will be terminated in a non-graceful way.</t>
 <t>Therefore, a NAT function MUST be able to handle IP-level fragmented
 SCTP packets. The fragments may arrive in any order.</t>
-<t>When an SCTP packet has to be fragmented by the NAT function and
-the IP header forbids fragmentation, the NAT MUST send back a corresponding
-ICMP message to the internal host.
+<t>When an SCTP packet can not be forwarded by the NAT function due to
+MTU issues and the IP header forbids fragmentation, the NAT MUST send back a
+"Fragmentation needed and DF set" ICMPv4 or PTB ICMPv6 message to the
+internal host.
 This allows for a faster recovery from this packet drop.</t>
 </section>
 
