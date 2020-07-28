@@ -879,7 +879,7 @@ MUST be included in the ABORT chunk sent in response to the packet containing
 an INIT chunk.</t>
 <t>If the collision is triggered by a packet containing an ASCONF chunk,
 a packet containing an ERROR chunk with the 'Port Number Collision' error cause
-MUST be sent in response to the packet containing the ASCONF chunk.</t>
+SHOULD be sent in response to the packet containing the ASCONF chunk.</t>
 </section>
 <section>
 <name>Endpoint Considerations</name>
