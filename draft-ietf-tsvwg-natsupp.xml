@@ -2065,22 +2065,25 @@ incoming SCTP packets.</t></li>
 <section numbered='false'>
 <name>Acknowledgments</name>
 <t>The authors wish to thank
-Mohamed Boucadair,
-Gorry Fairhurst,
-Bryan Ford,
-David Hayes,
-Alfred Hines,
-Karen E. E. Nielsen,
-Henning Peters,
-Maksim Proshin,
-Timo Voelker,
-Dan Wing,
-and Qiaobing Xie
+<contact fullname="Mohamed Boucadair"/>,
+<contact fullname="Gorry Fairhurst"/>,
+<contact fullname="Bryan Ford"/>,
+<contact fullname="David Hayes"/>,
+<contact fullname="Alfred Hines"/>,
+<contact fullname="Karen E. E. Nielsen"/>,
+<contact fullname="Henning Peters"/>,
+<contact fullname="Maksim Proshin"/>,
+<contact fullname="Timo Völker"/>,
+<contact fullname="Dan Wing"/>,
+and <contact fullname="Qiaobing Xie"/>
 for their invaluable comments.</t>
-<t>In addition, the authors wish to thank David Hayes, Jason But, and Grenville Armitage,
+<t>In addition, the authors wish to thank
+<contact fullname="David Hayes"/>,
+<contact fullname="Jason But"/>,
+and <contact fullname="Grenville Armitage"/>,
 the authors of <xref target='DOI_10.1145_1496091.1496095'/>, for their suggestions.</t>
-<t>The authors also wish to thank Mohamed Boucadair for contributing the
-text related to the YANG module.</t>
+<t>The authors also wish to thank <contact fullname="Mohamed Boucadair"/> for
+contributing the text related to the YANG module.</t>
 </section>
 
 </back>
