@@ -91,8 +91,8 @@ provides a reliable communications channel between two end-hosts in many
 ways similar to TCP <xref target='RFC0793'/>. With the widespread
 deployment of Network Address Translators (NAT), specialized code has been
 added to NAT functions for TCP that allows multiple hosts to reside behind a NAT
-functions using internal addresses (see <xref target='RFC6890'/>) and yet share
-single IPv4 address, even when two hosts (behind a NAT function) choose the
+function using internal addresses (see <xref target='RFC6890'/>) and yet share
+a single IPv4 address, even when two hosts (behind a NAT function) choose the
 same port numbers for their connection.
 This additional code is sometimes classified as Network Address and Port
 Translation (NAPT).
@@ -111,7 +111,7 @@ or DS-Lite <xref target='RFC6333'/>.</t>
 <t>This document specifies procedures allowing a NAT function to support SCTP
 by providing similar features to those provided by a NAPT for TCP and
 other supported protocols.
-The document also specifies a set of data formats for SCTP packets and a set
+This document also specifies a set of data formats for SCTP packets and a set
 of SCTP endpoint procedures to support NAT traversal.
 An SCTP implementation supporting these procedures can assure that in both
 single-homed and multi-homed cases a NAT function will maintain the appropriate
@@ -192,7 +192,7 @@ for this association to the Internal-Address.</t></dd>
 <dt>Remote-Address (Rem-Addr)</dt>
 <dd><t>The address that an internal host is attempting to contact.</t></dd>
 <dt>Remote-Port (Rem-Port)</dt>
-<dd><t>The port number of the peer process at the Remote-Address.</t></dd>
+<dd><t>The port number used by the host holding the Remote-Address.</t></dd>
 <dt>Remote-VTag (Rem-VTag)</dt>
 <dd><t>The Verification Tag (VTag) (see Section 3.1 of <xref target='RFC4960'/>)
 that the host holding the Remote-Address has chosen for an association.
@@ -220,7 +220,7 @@ address when sending packets towards the Remote-Address.</t></dd>
 </section>
 
 <section>
-<name>Motivation</name>
+<name>Motivation and Overview</name>
 <section>
 <name>SCTP NAT Traversal Scenarios</name>
 <t>This section defines the notion of single and
@@ -330,7 +330,7 @@ Therefore an SCTP variant of NAT function has been developed.</t>
 <section>
 <name>The SCTP-Specific Variant of NAT</name>
 <t>In this section it is allowed that there are multiple SCTP capable hosts
-behind a NAT function that has one Exernal-Address. Furthermore this section
+behind a NAT function that has one Exernal-Address. Furthermore, this section
 focuses on the single point traversal scenario.</t>
 
 <t>The modification of SCTP packets sent to the Internet is
@@ -353,12 +353,13 @@ of the host to which the packet has to be delivered. The lookup of the
 Internal-Address is based on the Remote-VTag, Remote-Port,
 Internal-VTag and the Internal-Port.</t>
 
-<t>The entries in the NAT binding table need to fulfill some uniqueness conditions.
+<t>The entries in the NAT binding table need to fulfill some uniqueness
+conditions.
 There can not be more than one entry NAT binding table with the same pair of
 Internal-Port and Remote-Port.
 This rule can be relaxed, if all NAT binding table entries with the same
 Internal-Port and Remote-Port have the support for the restart
-procedure enabled.
+procedure disabled.
 In this case there can not be no more than one entry with the same Internal-Port,
 Remote-Port and Remote-VTag and no more than one NAT binding table entry with
 the same Internal-Port, Remote-Port and Int-VTag.</t>
@@ -612,7 +613,7 @@ being sent then the bytes that do not fit are truncated.</t></dd>
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |    Cause Code = 0x00B1        |     Cause Length = Variable   |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-\                       Incoming Packet                        /
+\                       Original Packet                        /
 /                                                              \
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 </artwork>
@@ -624,7 +625,7 @@ IANA is requested to assign the value 0x00B1 for this cause code.</t></dd>
 <dt>Cause Length: 2 bytes (unsigned integer)</dt>
 <dd><t>This field holds the length in bytes of the error cause.
 The value MUST be the length of the Cause-Specific Information plus 4.</t></dd>
-<dt>Incoming Packet: variable length</dt>
+<dt>Original Packet: variable length</dt>
 <dd><t>The Cause-Specific Information is filled with the IPv4 or IPv6 packet that
 caused this error. The IPv4 or IPv6 header MUST be included.
 Note that if the packet will not fit in the ERROR chunk or ABORT chunk
@@ -746,7 +747,7 @@ any other chunk.</t>
 
 <section>
 <name>Procedures for SCTP Endpoints and NAT Functions</name>
-<t>When an SCTP endpoint is behind an SCTP-aware NAT a
+<t>If an SCTP endpoint is behind an SCTP-aware NAT a
 number of problems can arise as it tries to communicate with its peer:</t>
 <ul>
 <li><t>IP addresses can not be included in the SCTP packet. This is
@@ -755,8 +756,8 @@ discussed in <xref target='setup'/>.</t></li>
 port when talking to the same peer server. This creates a situation where
 the NAT function will not be able to tell the two associations apart. This situation
 is discussed in <xref target='mbitport'/>.</t></li>
-<li><t>When an SCTP endpoint is a server communicating with multiple peers and the
-peers are behind the same NAT function, then the two endpoints cannot be
+<li><t>If an SCTP endpoint is a server communicating with multiple peers and the
+peers are behind the same NAT function, then the these peers cannot be
 distinguished by the server. This case is discussed in <xref target='collision'/>.</t></li>
 <li><t>A restart of a NAT function during a conversation could cause a loss of its state.
 This problem and its solution is discussed in <xref target='restart'/>.</t></li>
@@ -766,8 +767,8 @@ This is discussed in <xref target='fragmentation'/>.</t></li>
 redundancy.
 The method to set up this scenario is discussed in <xref target='multihomed'/>.</t></li>
 </ul>
-<t>Each of these mechanisms requires additional chunks and parameters,
-defined in this document, and modified handling procedures
+<t>The mechanisms to solve these problems require additional chunks and
+parameters, defined in this document, and modified handling procedures
 from those specified in <xref target='RFC4960'/> as described below.</t>
 
 <section anchor='setup'>
@@ -800,9 +801,7 @@ NAT function cannot distinguish between incoming packets anymore.
 However, this is unlikely.
 The Internal-VTags are chosen at random and if the Internal-Ports are
 also chosen from the ephemeral port range at random this gives a 46-bit
-random number that has to match.
-A NAPT device can control the Port number and therefore avoid collisions
-deterministically.</t>
+random number that has to match.</t>
 
 <t>The same can happen with the Remote-VTag when a packet containing an
 INIT ACK chunk or an ASCONF chunk is processed by the NAT function.</t>
@@ -838,9 +837,9 @@ association setup procedure after choosing a new initiate tag,
 if the association is in COOKIE-WAIT state.
 In any other state, the SCTP endpoint MUST NOT respond.</t>
 
-<t>The sender of packet containing the ASCONF chunk, upon reception of a packet
-containing an ERROR chunk with M bit set, MUST stop adding the path to the
-association.</t>
+<t>The sender of the packet containing the ASCONF chunk, upon reception of a
+packet containing an ERROR chunk with M bit set, MUST stop adding the path to
+the association.</t>
 </section>
 </section>
 
@@ -865,7 +864,7 @@ The NAT function does the following when processing a packet containing an
 INIT chunk:</t>
 <ul>
 <li><t>If the packet containing the INIT chunk is originating from an internal
-port to an remote port for which the NAT function has no matching NAT binding
+port to a remote port for which the NAT function has no matching NAT binding
 table entry, it MUST allow the packet containing the INIT chunk creating
 an NAT binding table entry.</t></li>
 <li><t>If the packet containing the INIT chunk matches an existing NAT binding
@@ -911,20 +910,22 @@ multiple connections to what appears to be the same peer
 for which the lookup procedure does not find an entry in the NAT binding table,
 a packet containing an ERROR chunk SHOULD be sent back with the M bit set.
 The source address of the packet containing the ERROR chunk MUST
-be the destination address of the incoming SCTP packet.
+be the destination address of the packet received from the internal network.
 The verification tag is reflected and the T bit is set.
 Such a packet containing an ERROR chunk SHOULD NOT
-be sent if the received packet contains an ABORT, SHUTDOWN COMPLETE
-or INIT ACK chunk. A packet containing an ERROR chunk MUST NOT be sent if the
+be sent if the received packet contains an ASCONF chunk with the VTags parameter
+or an ABORT, SHUTDOWN COMPLETE or INIT ACK chunk.
+A packet containing an ERROR chunk MUST NOT be sent if the
 received packet contains an ERROR chunk with the M bit set.
 In any case, the packet SHOULD NOT be forwarded to the remote address.</t>
+<t>If the NAT function receives a packet from the internal network for which it
+has no NAT binding table entry and the packet contains an ASCONF chunk with the
+VTags parameter, the NAT function MUST update its NAT binding table according
+to the verification tags in the VTags parameter and, if present, the
+Disable Restart parameter.</t>
 <t>When sending a packet containing an ERROR chunk, the error cause
 'Missing State' (see <xref target='miss_state'/>) MUST be included and the
 M bit of the ERROR chunk MUST be set (see <xref target='mbiterr'/>).</t>
-<t>If the NAT device receives a packet for which it has no NAT binding table entry
-and the packet contains an ASCONF chunk with the VTags parameter, the NAT
-function MUST update its NAT binding table according to the verification tags in
-the VTags parameter and, if present, the Disable Restart parameter.</t>
 </section>
 <section>
 <name>Endpoint Considerations</name>
@@ -932,12 +933,11 @@ the VTags parameter and, if present, the Disable Restart parameter.</t>
 the receiver takes the following actions:</t>
 <ul>
 <li><t>It SHOULD validate that the verification tag is reflected by looking
-at the VTag that would have been included in the outgoing
-packet.
-If the validation fails, discard the incoming packet containing the ERROR chunk.</t></li>
+at the VTag that would have been included in an outgoing packet.
+If the validation fails, discard the received packet containing the ERROR chunk.</t></li>
 <li><t>It SHOULD validate that the peer of the SCTP association supports
 the dynamic address extension.
-If the validation fails, discard the incoming packet containing the ERROR chunk.</t></li>
+If the validation fails, discard the received packet containing the ERROR chunk.</t></li>
 <li><t>It SHOULD generate a packet containing a new ASCONF chunk containing the
 VTags parameter (see <xref target='vtags-parameter'/>) and the Disable Restart
 parameter (see <xref target='disrestart'/>) if the association is using the
@@ -947,12 +947,12 @@ The procedures for generating an ASCONF chunk can be found in
 <xref target='RFC5061'/>.</t></li>
 </ul>
 <t>The peer SCTP endpoint receiving such a packet containing an ASCONF chunk
-SHOULD either add the address and respond with an acknowledgment, if the
+SHOULD add the address and respond with an acknowledgment if the
 address is new to the association (following all procedures defined in
 <xref target='RFC5061'/>).
-Or, if the address is already part of the association, the SCTP endpoint
-MUST NOT respond with an error, but instead SHOULD respond with packet containing
-an ASCONF ACK chunk acknowledging the address and take no action
+If the address is already part of the association, the SCTP endpoint
+MUST NOT respond with an error, but instead SHOULD respond with a packet
+containing an ASCONF ACK chunk acknowledging the address and take no action
 (since the address is already in the association).</t>
 <t>Note that it is possible that upon receiving a packet containing an
 ASCONF chunk containing the VTags parameter the NAT function will realize that it has an
@@ -970,8 +970,8 @@ The endpoint does the following:</t>
 at the VTag that would have been included in the outgoing
 packet. If the validation fails, it MUST discard the packet.</t></li>
 <li><t>It MUST validate that the peer of the SCTP association supports
-the dynamic address extension. If the peer does not support it, the NAT function
-MUST discard the incoming packet containing the ERROR chunk.</t></li>
+the dynamic address extension. If the peer does not support this extension,
+it MUST discard the received packet containing the ERROR chunk.</t></li>
 <li><t>If the association is attempting to add an address (i.e. following
 the procedures in <xref target='multihomed'/>) then the endpoint MUST NOT
 consider the address part of the association and SHOULD make no
@@ -1014,8 +1014,9 @@ it MUST first set up the association single-homed with only one
 address causing the first NAT function to populate its state.
 Then it SHOULD add each IP address using packets containing ASCONF chunks
 sent via their respective NAT functions.
-The address to add is the wildcard address and the lookup address SHOULD
-also contain the VTags parameter and optionally the Disable Restart parameter.</t>
+The address used in the Add IP address parameter is the wildcard address
+(0.0.0.0 or ::0) and the address parameter in the ASCONF chunk SHOULD also
+contain the VTags parameter and optionally the Disable Restart parameter.</t>
 </section>
 
 </section>
@@ -1336,9 +1337,9 @@ NAT 1  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
 ]]>
 </artwork>
 <t>Host A announces its second address in an ASCONF chunk.
-The address parameter contains an wildcard address (0.0.0.0 or ::0) to indicate
+The address parameter contains a wildcard address (0.0.0.0 or ::0) to indicate
 that the source address has to be be added.
-The lookup address parameter within the ASCONF chunk will also contain
+The address parameter within the ASCONF chunk will also contain
 the pair of VTags (remote and internal) so that the NAT function can populate
 its NAT binding table entry completely with this single packet.</t>
 <artwork align="center">
