@@ -17,7 +17,7 @@
 <title abbrev='SCTP NAT Support'>
 Stream Control Transmission Protocol (SCTP) Network Address Translation Support
 </title>
-<seriesInfo name="Internet-Draft" value="draft-ietf-tsvwg-natsupp-21-to-be"/>
+<seriesInfo name="Internet-Draft" value="draft-ietf-tsvwg-natsupp-21"/>
 
 <!-- ************** RANDALL STEWART ***************-->
 <author initials='R. R.' surname='Stewart' fullname='Randall R. Stewart'>
@@ -78,7 +78,7 @@ This additional code is sometimes classified as Network Address and Port
 Translation (NAPT).</t>
 <t>This document describes the protocol extensions needed for the SCTP
 endpoints and the mechanisms for NAT functions necessary to provide similar
-features of NAPT in the single point and multi point traversal scenario.</t>
+features of NAPT in the single point and multipoint traversal scenario.</t>
 <t>Finally, a YANG module for SCTP NAT is defined.</t>
 </abstract>
 </front>
@@ -91,7 +91,7 @@ provides a reliable communications channel between two end-hosts in many
 ways similar to TCP <xref target='RFC0793'/>. With the widespread
 deployment of Network Address Translators (NAT), specialized code has been
 added to NAT functions for TCP that allows multiple hosts to reside behind a NAT
-function using internal addresses (see <xref target='RFC6890'/>) and yet share
+function using private-use addresses (see <xref target='RFC6890'/>) and yet share
 a single IPv4 address, even when two hosts (behind a NAT function) choose the
 same port numbers for their connection.
 This additional code is sometimes classified as Network Address and Port
@@ -107,10 +107,12 @@ The only alternative for supporting legacy NAT functions is to use
 UDP encapsulation as specified in <xref target='RFC6951'/>.</t>
 <t>The NAT function in the document refers to NAPT functions described in
 Section 2.2 of <xref target='RFC3022'/>, NAT64 <xref target='RFC6146'/>,
-or DS-Lite <xref target='RFC6333'/>.</t>
+or DS-Lite AFTR <xref target='RFC6333'/>.</t>
 <t>This document specifies procedures allowing a NAT function to support SCTP
-by providing similar features to those provided by a NAPT for TCP and
-other supported protocols.
+by providing similar features to those provided by a NAPT for
+TCP (see <xref target='RFC5382'/> and <xref target='RFC7857'/>),
+UDP (see <xref target='RFC4787'/> and <xref target='RFC7857'/>),
+and ICMP (see <xref target='RFC5508'/> and <xref target='RFC7857'/>).
 This document also specifies a set of data formats for SCTP packets and a set
 of SCTP endpoint procedures to support NAT traversal.
 An SCTP implementation supporting these procedures can assure that in both
@@ -122,18 +124,18 @@ reasons:</t>
 <li>It is desirable for SCTP internal end-hosts on multiple platforms to be able
 to share a NAT function's external IP address in the same way that a TCP session
 can use a NAT function.</li>
-<li><t>If a NAT function does not need to change any data within an SCTP packet
+<li><t>If a NAT function does not need to change any data within an SCTP packet,
 it will reduce the processing burden of NAT'ing SCTP by not needing to execute
 the CRC32c checksum used by SCTP.</t></li>
 <li><t>Not having to touch the IP payload makes the processing of ICMP
-messages in NAT functions easier.</t></li>
+messages by NAT functions easier.</t></li>
 </ul>
 <t>An SCTP-aware NAT function will need to follow these procedures for generating
 appropriate SCTP packet formats.</t>
-<t>When considering this feature it is possible to have
+<t>When considering SCTP-aware NAT it is possible to have
 multiple levels of support. At each level, the Internal
-Host, Remote Host and NAT function does or does not support the
-features described in this document. The following table
+Host, Remote Host, and NAT function does or does not support the
+procedures described in this document. The following table
 illustrates the results of the various combinations of
 support and if communications can occur between two endpoints.</t>
 <table anchor="communication_table" align="center">
@@ -152,12 +154,12 @@ support and if communications can occur between two endpoints.</t>
 <tr><td align="center">No Support   </td> <td align="center">No Support</td> <td align="center">No Support   </td> <td align="center">None         </td></tr>
 </tbody>
 </table>
-<t>From the table it can be seen that when a NAT function does not support the
-extension no communication can occur.
+<t>From the table it can be seen that when a NAT function does not support
+SCTP-aware NAT no communication can occur.
 This assumes that the NAT function does not handle SCTP packets at all and
-all SCTP packets sent externally from behind a NAT function are discarded by
+all SCTP packets sent from behind a NAT function are discarded by
 the NAT function.
-In some cases, where the NAT function supports the feature but one of the two
+In some cases, where the NAT function supports SCTP-aware NAT but one of the two
 hosts does not support the feature, communication possibly occurs but in a
 limited way.
 For example only one host can have a connection when a collision case occurs.</t>
@@ -179,7 +181,7 @@ and only when, they appear in all capitals, as shown here.</t>
 <xref target='RFC4960'/> and <xref target='RFC5061'/> is assumed.</t>
 <dl newline="true">
 <dt>Internal-Address (Int-Addr)</dt>
-<dd><t>The internal address that is known to the internal host.</t></dd>
+<dd><t>An internal address that is known to the internal host.</t></dd>
 <dt>Internal-Port (Int-Port)</dt>
 <dd><t>The port number that is in use by the host holding the
 Internal-Address.</t></dd>
@@ -199,20 +201,20 @@ that the host holding the Remote-Address has chosen for an association.
 The VTag is a unique 32-bit tag that accompanies any outgoing
 SCTP packet for this association to the Remote-Address.</t></dd>
 <dt>External-Address (Ext-Addr)</dt>
-<dd><t>The external address assigned to the NAT function, that it uses as a source
-address when sending packets towards the Remote-Address.</t></dd>
+<dd><t>An external address assigned to the NAT function, that it uses as a source
+address when sending packets towards a Remote-Address.</t></dd>
 </dl>
 <figure anchor='terminology_fig'>
-<name>Basic network setup</name>
+<name>Basic Network Setup</name>
 <artwork align="center">
   Internal Network    |         External Network
                       |
            Internal   |   External              Remote
-+--------+ Address    |   Address  /--\/--\    Address +--------+
-|  SCTP  |         +-----+        /        \           |  SCTP  |
-|endpoint|=========| NAT |=======| Internet |==========|endpoint|
-|    A   |         +-----+        \        /           |    B   |
-+--------+ Internal   |            \--/\--/     Remote +--------+
+           Address    |   Address  /--\/--\    Address
++--------+         +-----+        /        \           +--------+
+| Host A |=========| NAT |=======| Network  |==========| Host B |
++--------+         +-----+        \        /           +--------+
+           Internal   |            \--/\--/     Remote
  Internal    Port     |                           Port   Remote
    VTag               |                                   VTag
 </artwork>
@@ -224,39 +226,38 @@ address when sending packets towards the Remote-Address.</t></dd>
 <section>
 <name>SCTP NAT Traversal Scenarios</name>
 <t>This section defines the notion of single and
-multi point NAT traversal. </t>
-<section>
+multipoint NAT traversal. </t>
+<section anchor='single_point_traversal'>
 <name>Single Point Traversal</name>
 
 <t>In this case, all packets in the SCTP association go through a
-single NAT function, as shown below:</t>
-<figure>
-<name>Single NAT scenario</name>
+single NAT function, as shown in <xref target='single_nat_scenario_fig'/>.</t>
+<figure anchor='single_nat_scenario_fig'>
+<name>Single NAT Function Scenario</name>
 <artwork align="center">
-
   Internal Network    |       External Network
                       |
-+--------+            |               /--\/--\           +--------+
-|  SCTP  |         +-----+           /        \          |  SCTP  |
-|endpoint|=========| NAT |========= | Internet | ========|endpoint|
-|    A   |         +-----+           \        /          |    B   |
-+--------+            |               \--/\--/           +--------+
+                      |               /--\/--\
++--------+         +-----+           /        \          +--------+
+| Host A |=========| NAT |========= | Network  | ========| Host B |
++--------+         +-----+           \        /          +--------+
+                      |               \--/\--/
                       |
 </artwork>
 </figure>
 
-<t>A variation of this case is shown below, i.e., multiple NAT functions in a
-single path:</t>
-<figure>
-<name>Serial NAT Functions scenario</name>
+<t>A variation of this case is shown in <xref target='serial_nat_szenario_fig'/>,
+i.e., multiple NAT functions in the forwarding path between two endpoints.</t>
+<figure anchor='serial_nat_szenario_fig'>
+<name>Serial NAT Functions Scenario</name>
 <artwork align="center">
       Internal | External : Internal | External
                |          :          |
-+--------+     |          :          |       /--\/--\    +--------+
-|  SCTP  |  +-----+       :       +-----+   /        \   |  SCTP  |
-|endpoint|==| NAT |=======:=======| NAT |==| Internet |==|endpoint|
-|    A   |  +-----+       :       +-----+   \        /   |    B   |
-+--------+     |          :          |       \--/\--/    +--------+
+               |          :          |       /--\/--\
++--------+  +-----+       :       +-----+   /        \   +--------+
+| Host A |==| NAT |=======:=======| NAT |==| Network  |==| Host B |
++--------+  +-----+       :       +-----+   \        /   +--------+
+               |          :          |       \--/\--/
                |          :          |
 </artwork>
 </figure>
@@ -274,27 +275,25 @@ in this case sees all the packets of the SCTP association.</t>
 </section>
 
 <section>
-<name>Multi Point Traversal</name>
+<name>Multipoint Traversal</name>
 <t>This case involves multiple NAT functions and each NAT function only sees some
 of the packets in the SCTP association.
-An example is shown below:</t>
-<figure>
-<name>Parallel NAT functions scenario</name>
+An example is shown in <xref target='parallel_nat_scenario_fig'/>.</t>
+<figure anchor='parallel_nat_scenario_fig'>
+<name>Parallel NAT Functions Scenario</name>
 <artwork align="center">
-
          Internal      |      External
                     +------+             /---\/---\
-+--------+  /=======|NAT A |=========\  /          \     +--------+
-|  SCTP  | /        +------+          \/            \    |  SCTP  |
-|endpoint|/            |              |   Internet   |===|endpoint|
-|    A   |\            |               \            /    |    B   |
-+--------+ \        +------+          / \          /     +--------+
+            /=======|NAT A |=========\  /          \
++--------+ /        +------+          \/            \    +--------+
+| Host A |/            |              |    Network   |===| Host B |
++--------+\            |               \            /    +--------+
+           \        +------+          / \          /
             \=======|NAT B |=========/   \---\/---/
                     +------+
                        |
 </artwork>
 </figure>
-
 <t>This case does not apply to a single-homed SCTP association (i.e.,
 both endpoints in the association use only one IP address). The
 advantage here is that the existence of multiple NAT traversal points
@@ -308,7 +307,7 @@ communication.</t>
 <name>Limitations of Classical NAPT for SCTP</name>
 <t>Using classical NAPT possibly results in changing one of the SCTP port numbers
 during the processing which requires the recomputation of the transport layer
-checksum by the NAPT device.
+checksum by the NAPT function.
 Whereas for UDP and TCP this can be done very efficiently, for SCTP
 the checksum (CRC32c) over the entire packet needs to be recomputed
 (see Appendix B of <xref target='RFC4960'/> for details of the CRC32c
@@ -316,29 +315,32 @@ computation).
 This would considerably add to the NAT computational burden, however hardware
 support can mitigate this in some implementations.</t>
 <t>An SCTP endpoint can have multiple addresses but only has a single port
-number. To make multipoint traversal work, all the NAT functions involved need to
+number to use.
+To make multipoint traversal work, all the NAT functions involved need to
 recognize the packets they see as belonging to the same SCTP association and
 perform port number translation in a consistent way.
-One possible way of doing this is to use a pre-defined table of ports and
-addresses configured within each NAT function.
+One possible way of doing this is to use a pre-defined table of port numbers
+and addresses configured within each NAT function.
 Other mechanisms could make use of NAT to NAT communication.
 Such mechanisms have not been deployed on a wide scale base and thus are not
 a preferred solution.
-Therefore an SCTP variant of NAT function has been developed.</t>
+Therefore an SCTP variant of NAT function has been developed
+(see <xref target='SCTP_aware_NAT'/>).</t>
 </section>
 
-<section>
+<section anchor='SCTP_aware_NAT'>
 <name>The SCTP-Specific Variant of NAT</name>
 <t>In this section it is allowed that there are multiple SCTP capable hosts
-behind a NAT function that has one Exernal-Address. Furthermore, this section
-focuses on the single point traversal scenario.</t>
+behind a NAT function that share one External-Address.
+Furthermore, this section focuses on the single point traversal scenario
+(see <xref target='single_point_traversal'/>).</t>
 
-<t>The modification of SCTP packets sent to the Internet is
-simple: the source address of the packet has to be replaced with the
+<t>The modification of outgoing SCTP packets sent from an internal host is
+simple: the source address of the packets has to be replaced with the
 External-Address. It might also be necessary to establish some
 state in the NAT function to later handle incoming packets.</t>
 
-<t>For the SCTP NAT processing the NAT function has to maintain a NAT binding table
+<t>Typically, the NAT function has to maintain a NAT binding table
 of Internal-VTag, Internal-Port, Remote-VTag, Remote-Port, Internal-Address,
 and whether the restart procedure is disabled or not.
 An entry in that NAT binding table is called a NAT-State control block.
@@ -347,10 +349,11 @@ a NAT-State control block.
 A NAT function MAY allow creating NAT-State control blocks via a management
 interface.</t>
 
-<t>For SCTP packets coming from the Internet the destination
-address of the packets has to be replaced with the Internal-Address
-of the host to which the packet has to be delivered. The lookup of the
-Internal-Address is based on the Remote-VTag, Remote-Port,
+<t>For SCTP packets coming from the external realm of the NAT function the
+destination address of the packets has to be replaced with the Internal-Address
+of the host to which the packet has to be delivered, if a NAT state entry is
+found.
+The lookup of the Internal-Address is based on the Remote-VTag, Remote-Port,
 Internal-VTag and the Internal-Port.</t>
 
 <t>The entries in the NAT binding table need to fulfill some uniqueness
@@ -359,10 +362,10 @@ There can not be more than one entry NAT binding table with the same pair of
 Internal-Port and Remote-Port.
 This rule can be relaxed, if all NAT binding table entries with the same
 Internal-Port and Remote-Port have the support for the restart
-procedure disabled.
+procedure disabled (see <xref target='disrestart'/>).
 In this case there can not be no more than one entry with the same Internal-Port,
 Remote-Port and Remote-VTag and no more than one NAT binding table entry with
-the same Internal-Port, Remote-Port and Int-VTag.</t>
+the same Internal-Port, Remote-Port, and Int-VTag.</t>
 
 <t>The processing of outgoing SCTP packets containing an INIT chunk
 is described in the following figure. The scenario shown is valid for all
@@ -371,7 +374,7 @@ message flows in this section.</t>
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
-| Host A | <------> | NAT | <------> | Internet | <------> | Host B |
+| Host A | <------> | NAT | <------> | Network  | <------> | Host B |
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
 
@@ -392,24 +395,25 @@ message flows in this section.</t>
 ]]>
 </artwork>
 <t>Normally a NAT binding table entry will be created.</t>
-<t>However, it is possible that there is already a NAT binding table entry with the
-same Remote-Port, Internal-Port, and Internal-VTag
-but different Internal-Address.
+<t>However, it is possible that there is already a NAT binding table entry with
+the same Remote-Port, Internal-Port, and Internal-VTag
+but different Internal-Address and the restart procedure is disabled.
 In this case the packet containing the INIT chunk MUST be dropped by the NAT
 and a packet containing an ABORT chunk SHOULD be sent to the SCTP host that
-originated the packet with the M-Bit set and an appropriate error cause
-(see <xref target='mbitabort'/> for the format).
+originated the packet with the M bit set and 'VTag and Port Number Collision'
+error cause (see <xref target='mbitabort'/> for the format).
 The source address of the packet containing the ABORT chunk MUST be the
 destination address of the packet containing the INIT chunk.</t>
 <t>If an outgoing SCTP packet contains an INIT or ASCONF chunk and a matching
 NAT binding table entry is found, the packet is processed as a normal
 outgoing packet.</t>
-<t>It is also possible that a connection to Remote-Address and Remote-Port
-exists without an Internal-VTag conflict but there exists a NAT binding
-table entry with the same port numbers but a different Internal-Address.
+<t>It is also possible that a NAT binding table entry with the same Remote-Port
+and Internal-Port exists without an Internal-VTag conflict but there exists
+a NAT binding table entry with the same port numbers but a different
+Internal-Address and the restart procedure is not disabled.
 In such a case the packet containing the INIT chunk MUST be dropped by the NAT function
 and a packet containing an ABORT chunk SHOULD be sent to the SCTP host that
-originated the packet with the M-Bit set and an appropriate error
+originated the packet with the M bit set and 'Port Number Collision' error
 cause (see <xref target='mbitabort'/> for the format).</t>
 <t>The processing of outgoing SCTP packets containing no INIT chunks
 is described in the following figure.</t>
@@ -417,7 +421,7 @@ is described in the following figure.</t>
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
-| Host A | <------> | NAT | <------> | Internet | <------> | Host B |
+| Host A | <------> | NAT | <------> | Network  | <------> | Host B |
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
 
@@ -443,7 +447,7 @@ or changed in the Update() function, respectively.</t>
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
-| Host A | <------> | NAT | <------> | Internet | <------> | Host B |
+| Host A | <------> | NAT | <------> | Network  | <------> | Host B |
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
 
@@ -467,13 +471,13 @@ If it succeeds, the Update routine inserts the Remote-VTag
 (the Initiate-Tag of the INIT ACK chunk) in the NAT-State control block.</t>
 
 <t>The processing of incoming SCTP packets containing an ABORT or
-SHUTDOWN COMPLETE chunk with the T-Bit set is described in the
+SHUTDOWN COMPLETE chunk with the T bit set is illustrated in the
 following figure.</t>
 <artwork align="center">
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
-| Host A | <------> | NAT | <------> | Internet | <------> | Host B |
+| Host A | <------> | NAT | <------> | Network  | <------> | Host B |
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
 
@@ -490,10 +494,10 @@ following figure.</t>
 </artwork>
 <t>For an incoming packet containing an INIT chunk a table lookup is made
 only based on the addresses and port numbers.
-If an entry with an Remote-VTag of zero is found, it is considered a
+If an entry with a Remote-VTag of zero is found, it is considered a
 match and the Remote-VTag is updated.
 If an entry with a non-matching Remote-VTag is found or no entry is found,
-the incoming packet is dropped. If an entry with a matching Remote-VTag
+the incoming packet is silently dropped. If an entry with a matching Remote-VTag
 is found, the incoming packet is forwarded.
 This allows the handling of INIT collision through NAT functions.</t>
 <t>The processing of other incoming SCTP packets is described in the
@@ -502,7 +506,7 @@ following figure.</t>
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
-| Host A | <------> | NAT | <------> | Internet | <------> | Host B |
+| Host A | <------> | NAT | <------> | Network  | <------> | Host B |
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
 
@@ -546,7 +550,7 @@ for which additional flags are specified by this document.</t>
 </artwork>
 <t>The ABORT chunk is extended to add the new 'M bit'. The M bit
 indicates to the receiver of the ABORT chunk that the chunk was not
-generated by the peer SCTP endpoint, but instead by a middle box.</t>
+generated by the peer SCTP endpoint, but instead by a middle box (e.g., NAT).</t>
 <t>[NOTE to RFC-Editor: Assignment of M bit to be confirmed by IANA.]</t>
 </section>
 
@@ -747,15 +751,16 @@ any other chunk.</t>
 
 <section>
 <name>Procedures for SCTP Endpoints and NAT Functions</name>
-<t>If an SCTP endpoint is behind an SCTP-aware NAT a
-number of problems can arise as it tries to communicate with its peer:</t>
+<t>If an SCTP endpoint is behind an SCTP-aware NAT, a
+number of problems can arise as it tries to communicate with its peers:</t>
 <ul>
 <li><t>IP addresses can not be included in the SCTP packet. This is
 discussed in <xref target='setup'/>.</t></li>
 <li><t>More than one host behind a NAT function could select the same VTag and source
-port when talking to the same peer server. This creates a situation where
-the NAT function will not be able to tell the two associations apart. This situation
-is discussed in <xref target='mbitport'/>.</t></li>
+port number when communicating with the same peer server.
+This creates a situation where the NAT function will not be able to tell the
+two associations apart.
+This situation is discussed in <xref target='mbitport'/>.</t></li>
 <li><t>If an SCTP endpoint is a server communicating with multiple peers and the
 peers are behind the same NAT function, then the these peers cannot be
 distinguished by the server. This case is discussed in <xref target='collision'/>.</t></li>
@@ -794,14 +799,14 @@ defined in <xref target='disrestart'/>.</t>
 <section anchor='mbitport'>
 <name>Handling of Internal Port Number and Verification Tag Collisions</name>
 <t>Consider the case where two hosts in the Internal-Address space want to
-set up an SCTP association with the same service provided by some hosts
-in the Internet. This means that the Remote-Port is the same.
+set up an SCTP association with the same service provided by some remote hosts.
+This means that the Remote-Port is the same.
 If they both choose the same Internal-Port and Internal-VTag, the
 NAT function cannot distinguish between incoming packets anymore.
 However, this is unlikely.
 The Internal-VTags are chosen at random and if the Internal-Ports are
-also chosen from the ephemeral port range at random this gives a 46-bit
-random number that has to match.</t>
+also chosen from the ephemeral port range at random (see <xref target='RFC6056'/>)
+this gives a 46-bit random number that has to match.</t>
 
 <t>The same can happen with the Remote-VTag when a packet containing an
 INIT ACK chunk or an ASCONF chunk is processed by the NAT function.</t>
@@ -847,7 +852,7 @@ the association.</t>
 <name>Handling of Internal Port Number Collisions</name>
 <t>When two SCTP hosts are behind an SCTP-aware NAT it is possible that two
 SCTP hosts in the Internal-Address space will want to set up an
-SCTP association with the same server running on the same host in the Internet.
+SCTP association with the same server running on the same remote host.
 If the two hosts choose the same internal port, this is considered an
 internal port number collision.</t>
 <t>For the NAT function, appropriate tracking can be performed by assuring that
@@ -882,8 +887,8 @@ SHOULD be sent in response to the packet containing the ASCONF chunk.</t>
 </section>
 <section>
 <name>Endpoint Considerations</name>
-<t>For the remote SCTP server on the Internet this means that the
-Remote-Port and the Remote-Address are the same.
+<t>For the remote SCTP server this means that the Remote-Port and the
+Remote-Address are the same.
 If they both have chosen the same Internal-Port the server cannot distinguish
 between both associations based on the address and port numbers.
 For the server it looks like the association is being restarted.
@@ -1039,7 +1044,7 @@ INIT chunk.</t>
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
-| Host A | <------> | NAT | <------> | Internet | <------> | Host B |
+| Host A | <------> | NAT | <------> | Network  | <------> | Host B |
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
        +---------+--------+----------+--------+-----------+
@@ -1076,7 +1081,7 @@ destination address.</t>
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
-| Host A | <------> | NAT | <------> | Internet | <------> | Host B |
+| Host A | <------> | NAT | <------> | Network  | <------> | Host B |
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
 
@@ -1103,7 +1108,7 @@ INIT ACK[Initiate-Tag = 5678]
 <![CDATA[
                                        /--\/--\
 +--------+          +-----+           /        \           +--------+
-| Host A | <------> | NAT | <------> | Internet | <------> | Host B |
+| Host A | <------> | NAT | <------> | Network  | <------> | Host B |
 +--------+          +-----+           \         /          +--------+
                                        \--/\---/
 
@@ -1138,7 +1143,7 @@ in the single-homed case.
                                                +--------+
                                /--\/--\      /-|Router 1| \
 +------+         +-----+      /        \    /  +--------+  \ +------+
-| Host | <-----> | NAT | <-> | Internet | ==                =| Host |
+| Host | <-----> | NAT | <-> | Network  | ==                =| Host |
 |   A  |         +-----+      \        /    \  +--------+  / |   B  |
 +------+                       \--/\--/      \-|Router 2|-/  +------+
                                                +--------+
@@ -1175,7 +1180,7 @@ NAT    |  Int    |  Int   |   Rem    |   Rem  |    Int    |
                                                +--------+
                                /--\/--\      /-|Router 1| \
 +------+         +-----+      /        \    /  +--------+  \ +------+
-| Host | <-----> | NAT | <-> | Internet | ==                =| Host |
+| Host | <-----> | NAT | <-> | Network  | ==                =| Host |
 |   A  |         +-----+      \        /    \  +--------+  / |   B  |
 +------+                       \--/\--/      \-|Router 2|-/  +------+
                                                +--------+
@@ -1208,7 +1213,7 @@ INIT ACK[Initiate-Tag = 5678]
                                                +--------+
                                /--\/--\      /-|Router 1| \
 +------+         +-----+      /        \    /  +--------+  \ +------+
-| Host | <-----> | NAT | <-> | Internet | ==                =| Host |
+| Host | <-----> | NAT | <-> | Network  | ==                =| Host |
 |   A  |         +-----+      \        /    \  +--------+  / |   B  |
 +------+                       \--/\--/      \-|Router 2|-/  +------+
                                                +--------+
@@ -1244,7 +1249,7 @@ server (Host B), but does not include the second address.</t>
                +-------+
             /--| NAT 1 |--\       /--\/--\
 +------+   /   +-------+   \     /        \     +--------+
-| Host |===                 ====| Internet |====| Host B |
+| Host |===                 ====| Network  |====| Host B |
 |   A  |   \   +-------+   /     \        /     +--------+
 +------+    \--| NAT 2 |--/       \--/\--/
                +-------+
@@ -1281,7 +1286,7 @@ NAT 1  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
                      +-------+
             /--------| NAT 1 |--------\       /--\/--\
 +------+   /         +-------+         \     /        \    +--------+
-| Host |===                             ====| Internet |===| Host B |
+| Host |===                             ====| Network  |===| Host B |
 |   A  |   \         +-------+         /     \        /    +--------+
 +------+    \--------| NAT 2 |--------/       \--/\--/
                      +-------+
@@ -1313,7 +1318,7 @@ NAT 1  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
                      +-------+
             /--------| NAT 1 |--------\       /--\/--\
 +------+   /         +-------+         \     /        \    +--------+
-| Host |===                             ====| Internet |===| Host B |
+| Host |===                             ====| Network  |===| Host B |
 |   A  |   \         +-------+         /     \        /    +--------+
 +------+    \--------| NAT 2 |--------/       \--/\--/
                      +-------+
@@ -1347,7 +1352,7 @@ its NAT binding table entry completely with this single packet.</t>
                      +-------+
             /--------| NAT 1 |--------\       /--\/--\
 +------+   /         +-------+         \     /        \    +--------+
-| Host |===                             ====| Internet |===| Host B |
+| Host |===                             ====| Network  |===| Host B |
 |   A  |   \         +-------+         /     \        /    +--------+
 +------+    \--------| NAT 2 |--------/       \--/\--/
                      +-------+
@@ -1391,7 +1396,7 @@ to Host B.</t>
 <![CDATA[
                                          /--\/--\
 +--------+              +-----+         /        \         +--------+
-| Host A | <----------> | NAT | <----> | Internet | <----> | Host B |
+| Host A | <----------> | NAT | <----> | Network  | <----> | Host B |
 +--------+              +-----+         \        /         +--------+
                                          \--/\--/
 
@@ -1406,17 +1411,17 @@ NAT    |  Int    |  Int   |   Rem    |   Rem  |    Int    |
 ]]>
 </artwork>
 <t>The NAT function cannot find an entry in the NAT binding table for the association.
-It sends a packet containing an ERROR chunk with the M-Bit set and the cause
+It sends a packet containing an ERROR chunk with the M bit set and the cause
 "NAT state missing".</t>
 <artwork align="center">
 <![CDATA[
                                          /--\/--\
 +--------+              +-----+         /        \         +--------+
-| Host A | <----------> | NAT | <----> | Internet | <----> | Host B |
+| Host A | <----------> | NAT | <----> | Network  | <----> | Host B |
 +--------+              +-----+         \        /         +--------+
                                          \--/\--/
 
-  ERROR [M-Bit, NAT state missing]
+  ERROR [M bit, NAT state missing]
 10.0.0.1:1 <---------- 203.0.113.1:2
           Rem-VTag = 5678
 ]]>
@@ -1428,7 +1433,7 @@ deleted and the source address of the actual packet added.</t>
 <![CDATA[
                                          /--\/--\
 +--------+              +-----+         /        \         +--------+
-| Host A | <----------> | NAT | <----> | Internet | <----> | Host B |
+| Host A | <----------> | NAT | <----> | Network  | <----> | Host B |
 +--------+              +-----+         \        /         +--------+
                                          \--/\--/
 
@@ -1454,7 +1459,7 @@ all other addresses from this association.</t>
 <![CDATA[
                                          /--\/--\
 +--------+              +-----+         /        \         +--------+
-| Host A | <----------> | NAT | <----> | Internet | <----> | Host B |
+| Host A | <----------> | NAT | <----> | Network  | <----> | Host B |
 +--------+              +-----+         \        /         +--------+
                                          \--/\--/
 
@@ -1476,7 +1481,7 @@ all other addresses from this association.</t>
 </artwork>
 </section>
 <section>
-<name>Peer-to-Peer Communication</name>
+<name>Peer-to-Peer Communications</name>
 <t>If two hosts, each of them behind a NAT function, want to communicate with
 each other, they have to get knowledge of the peer's external address.
 This can be achieved with a so-called rendezvous server.
@@ -1493,7 +1498,7 @@ flow is done from the sending host's point of view.</t>
                    |                             |
                    |          /--\/---\          |
 +--------+     +-------+     /         \     +-------+     +--------+
-| Host A |<--->| NAT A |<-->| Internet  |<-->| NAT B |<--->| Host B |
+| Host A |<--->| NAT A |<-->| Network   |<-->| NAT B |<--->| Host B |
 +--------+     +-------+     \         /     +-------+     +--------+
                    |          \--/\---/          |
 
@@ -1547,7 +1552,7 @@ by NAT function B. Its parameters are used to create an entry.</t>
                    |                             |
                    |          /--\/---\          |
 +--------+     +-------+     /         \     +-------+     +--------+
-| Host A |<--->| NAT A |<-->| Internet  |<-->| NAT B |<--->| Host B |
+| Host A |<--->| NAT A |<-->| Network   |<-->| NAT B |<--->| Host B |
 +--------+     +-------+     \         /     +-------+     +--------+
                    |          \--/\---/          |
 
@@ -1576,7 +1581,7 @@ an entry, the entry is found and updated:</t>
                    |                             |
                    |          /--\/---\          |
 +--------+     +-------+     /         \     +-------+     +--------+
-| Host A |<--->| NAT A |<-->| Internet  |<-->| NAT B |<--->| Host B |
+| Host A |<--->| NAT A |<-->| Network   |<-->| NAT B |<--->| Host B |
 +--------+     +-------+     \         /     +-------+     +--------+
                    |          \--/\---/          |
 
@@ -1601,7 +1606,7 @@ NAT function B:</t>
                    |                             |
                    |          /--\/---\          |
 +--------+     +-------+     /         \     +-------+     +--------+
-| Host A |<--->| NAT A |<-->| Internet  |<-->| NAT B |<--->| Host B |
+| Host A |<--->| NAT A |<-->| Network   |<-->| NAT B |<--->| Host B |
 +--------+     +-------+     \         /     +-------+     +--------+
                    |          \--/\---/          |
 
@@ -1635,7 +1640,7 @@ NAT B  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
                    |                             |
                    |          /--\/---\          |
 +--------+     +-------+     /         \     +-------+     +--------+
-| Host A |<--->| NAT A |<-->| Internet  |<-->| NAT B |<--->| Host B |
+| Host A |<--->| NAT A |<-->| Network   |<-->| NAT B |<--->| Host B |
 +--------+     +-------+     \         /     +-------+     +--------+
                    |          \--/\---/          |
 
@@ -1722,7 +1727,7 @@ MUST be set to '132');</t>
 <name>YANG Module</name>
 <sourcecode>
 <![CDATA[
-<CODE BEGINS> file "ietf-nat-sctp@2020-07-13.yang"
+<CODE BEGINS> file "ietf-nat-sctp@2020-11-02.yang"
 module ietf-nat-sctp {
   yang-version 1.1;
   namespace "urn:ietf:params:xml:ns:yang:ietf-nat-sctp";
@@ -2052,7 +2057,11 @@ incoming SCTP packets.</t></li>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml-doi/reference.DOI.10.1145/1496091.1496095.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.0793.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3022.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4787.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.4963.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5382.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5508.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6056.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6146.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6269.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6333.xml"/>
@@ -2060,6 +2069,8 @@ incoming SCTP packets.</t></li>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6890.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6951.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7950.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7857.xml"/>
+
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8340.xml"/>
 </references>
 <section numbered='false'>
