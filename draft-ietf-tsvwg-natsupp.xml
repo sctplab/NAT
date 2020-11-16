@@ -154,15 +154,15 @@ support and if communications can occur between two endpoints.</t>
 <tr><td align="center">No Support   </td> <td align="center">No Support</td> <td align="center">No Support   </td> <td align="center">None         </td></tr>
 </tbody>
 </table>
-<t>From the table it can be seen that when a NAT function does not support
-SCTP-aware NAT no communication can occur.
+<t>From the table it can be seen that no communication can occur when a
+NAT function does not support SCTP-aware NAT.
 This assumes that the NAT function does not handle SCTP packets at all and
 all SCTP packets sent from behind a NAT function are discarded by
 the NAT function.
-In some cases, where the NAT function supports SCTP-aware NAT but one of the two
-hosts does not support the feature, communication possibly occurs but in a
+In some cases, where the NAT function supports SCTP-aware NAT, but one of the
+two hosts does not support the feature, communication can possibly occur in a
 limited way.
-For example only one host can have a connection when a collision case occurs.</t>
+For example, only one host can have a connection when a collision case occurs.</t>
 </section>
 
 <section anchor='conventions'>
@@ -306,7 +306,7 @@ communication.</t>
 <section>
 <name>Limitations of Classical NAPT for SCTP</name>
 <t>Using classical NAPT possibly results in changing one of the SCTP port numbers
-during the processing which requires the recomputation of the transport layer
+during the processing, which requires the recomputation of the transport layer
 checksum by the NAPT function.
 Whereas for UDP and TCP this can be done very efficiently, for SCTP
 the checksum (CRC32c) over the entire packet needs to be recomputed
@@ -368,7 +368,7 @@ Remote-Port and Remote-VTag and no more than one NAT binding table entry with
 the same Internal-Port, Remote-Port, and Int-VTag.</t>
 
 <t>The processing of outgoing SCTP packets containing an INIT chunk
-is described in the following figure. The scenario shown is valid for all
+is illustrated in the following figure. This scenario is valid for all
 message flows in this section.</t>
 <artwork align="center">
 <![CDATA[
@@ -436,13 +436,14 @@ Int-Addr:Int-Port ------> Rem-Addr:Rem-Port
 ]]>
 </artwork>
 <t>The processing of incoming SCTP packets containing an INIT ACK chunk
-is described in the following figure. The Lookup() function getting as
-input the Internal-VTag, Internal-Port, Remote-VTag, and Remote-Port,
-returns the corresponding entry of the NAT binding table
-and updates the Remote-VTag by substituting it with the value of the
-Initiate-Tag of the INIT ACK chunk. The wildcard character signifies that
-the parameter's value is not considered in the Lookup() function
-or changed in the Update() function, respectively.</t>
+is illustrated in the following figure.
+The Lookup() function has as input the Internal-VTag, Internal-Port,
+Remote-VTag, and Remote-Port.
+It returns the corresponding entry of the NAT binding table and updates
+the Remote-VTag by substituting it with the value of the Initiate-Tag of the
+INIT ACK chunk.
+The wildcard character signifies that the parameter's value is not considered
+in the Lookup() function or changed in the Update() function, respectively.</t>
 <artwork align="center">
 <![CDATA[
                                        /--\/--\
@@ -697,8 +698,8 @@ IANA is requested to assign the value 0xC007 for this parameter type.</t></dd>
 The value MUST be 4.</t></dd>
 </dl>
 <t>[NOTE to RFC-Editor: Assignment of parameter type to be confirmed by IANA.]</t>
-<t>This parameter MAY appear in INIT, INIT ACK and ASCONF chunks and
-MUST NOT appear in any other chunk.</t>
+<t>The Disable Restart Parameter MAY appear in INIT, INIT ACK and ASCONF chunks
+and MUST NOT appear in any other chunk.</t>
 </section>
 
 <section anchor='vtags-parameter'>
@@ -731,7 +732,8 @@ request parameter. The receiver of the ASCONF Chunk will copy this
 32-bit value into the ASCONF Response Correlation ID field of the
 ASCONF ACK response parameter. The sender of the packet containing the ASCONF
 chunk can use this same value in the ASCONF ACK chunk to find which request the
-response is for. Note that the receiver MUST NOT change this 32-bit value.</t></dd>
+response is for. The receiver MUST NOT change the value of the ASCONF-Request
+Correlation ID.</t></dd>
 <dt>Internal Verification Tag: 4 bytes (unsigned integer)</dt>
 <dd><t>The Verification Tag that the internal host has chosen for the association.
 The Verification Tag is a unique 32-bit tag that accompanies
@@ -743,7 +745,7 @@ The VTag is a unique 32-bit tag that accompanies any outgoing SCTP packet for
 this association to the Remote-Address.</t></dd>
 </dl>
 <t>[NOTE to RFC-Editor: Assignment of parameter type to be confirmed by IANA.]</t>
-<t>This parameter MAY appear in ASCONF chunks and MUST NOT appear in
+<t>The VTags Parameter MAY appear in ASCONF chunks and MUST NOT appear in
 any other chunk.</t>
 </section>
 </section>
