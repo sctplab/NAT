@@ -10,14 +10,14 @@
      submissionType="IETF"
      consensus="true"
      category="std"
-     docName="draft-ietf-tsvwg-natsupp-22-to-be"
+     docName="draft-ietf-tsvwg-natsupp-22"
      version="3">
 
 <front>
 <title abbrev='SCTP NAT Support'>
 Stream Control Transmission Protocol (SCTP) Network Address Translation Support
 </title>
-<seriesInfo name="Internet-Draft" value="draft-ietf-tsvwg-natsupp-22-to-be"/>
+<seriesInfo name="Internet-Draft" value="draft-ietf-tsvwg-natsupp-22"/>
 
 <!-- ************** RANDALL STEWART ***************-->
 <author initials='R. R.' surname='Stewart' fullname='Randall R. Stewart'>
@@ -1004,7 +1004,8 @@ can happen that using IP-level fragmentation is needed to continue
 an SCTP association. For example, if the path MTU is reduced and there
 are still some DATA chunk in flight, which require packets larger than
 the new path MTU. If IP-level fragmentation can not be used, the SCTP
-association will be terminated in a non-graceful way.</t>
+association will be terminated in a non-graceful way.
+See <xref target="RFC8900"/> for more information about IP fragmentation.</t>
 <t>Therefore, a NAT function MUST be able to handle IP-level fragmented
 SCTP packets. The fragments MAY arrive in any order.</t>
 <t>When an SCTP packet can not be forwarded by the NAT function due to
@@ -1026,6 +1027,164 @@ The address used in the Add IP address parameter is the wildcard address
 contain the VTags parameter and optionally the Disable Restart parameter.</t>
 </section>
 
+</section>
+
+<section>
+<name>SCTP NAT YANG Module</name>
+<t>This section defines a YANG module for SCTP NAT.</t>
+<t>The terminology for describing YANG data models is defined
+in <xref target="RFC7950" />.
+The meaning of the symbols in tree diagrams is defined
+in <xref target="RFC8340" />.</t>
+
+<section>
+<name>Tree Structure</name>
+<t>This module augments NAT YANG module <xref target="RFC8512" /> with
+SCTP specifics.
+The module supports both classical SCTP NAT (that is, rewrite port numbers)
+and SCTP-specific variant where the ports numbers are not altered.
+The YANG "feature" is used to indicate whether SCTP-specific variant is
+supported.</t>
+<t>The tree structure of the SCTP NAT YANG module is provided below:</t>
+<artwork>
+<![CDATA[
+module: ietf-nat-sctp
+  augment /nat:nat/nat:instances/nat:instance
+          /nat:policy/nat:timers:
+    +--rw sctp-timeout?   uint32
+  augment /nat:nat/nat:instances/nat:instance
+         /nat:mapping-table/nat:mapping-entry:
+    +--rw int-VTag?   uint32 {sctp-nat}?
+    +--rw rem-VTag?   uint32 {sctp-nat}?
+]]>
+</artwork>
+<t>Concretely, the SCTP NAT YANG module augments the NAT YANG module
+(policy, in particular) with the following:</t>
+<ul>
+<li><t>The sctp-timeout is used to control the SCTP inactivity timeout.
+That is, the time an SCTP mapping will stay active without SCTP packets
+traversing the NAT.
+This timeout can be set only for SCTP.
+Hence, "/nat:nat/nat:instances/nat:instance/nat:policy/nat:transport-protocols/nat:protocol-id"
+MUST be set to '132' (SCTP).</t></li>
+</ul>
+
+<t>In addition, the SCTP NAT YANG module augments the mapping entry
+with the following parameters defined in <xref target='terminology' />.
+These parameters apply only for SCTP NAT mapping entries (i.e.,
+"/nat/instances/instance/mapping-table/mapping-entry/transport-protocol"
+MUST be set to '132');</t>
+<ul>
+<li><t>The Internal Verification Tag (Int-VTag)</t></li>
+<li><t>The Remote Verification Tag (Rem-VTag)</t></li>
+</ul>
+</section>
+
+<section>
+<name>YANG Module</name>
+<sourcecode>
+<![CDATA[
+<CODE BEGINS> file "ietf-nat-sctp@2020-11-02.yang"
+module ietf-nat-sctp {
+  yang-version 1.1;
+  namespace "urn:ietf:params:xml:ns:yang:ietf-nat-sctp";
+  prefix nat-sctp;
+
+  import ietf-nat {
+    prefix nat;
+    reference
+      "RFC 8512: A YANG Module for Network Address Translation
+                 (NAT) and Network Prefix Translation (NPT)";
+  }
+
+  organization
+    "IETF TSVWG Working Group";
+  contact
+    "WG Web:   <https://datatracker.ietf.org/wg/tsvwg/>
+     WG List:  <mailto:tsvwg@ietf.org>
+
+     Author:  Mohamed Boucadair
+              <mailto:mohamed.boucadair@orange.com>";
+  description
+    "This module augments NAT YANG module with Stream Control
+     Transmission Protocol (SCTP) specifics. The extension supports
+     both a classical SCTP NAT (that is, rewrite port numbers)
+     and a, SCTP-specific variant where the ports numbers are
+     not altered.
+
+     Copyright (c) 2020 IETF Trust and the persons identified as
+     authors of the code.  All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, is permitted pursuant to, and subject
+     to the license terms contained in, the Simplified BSD License
+     set forth in Section 4.c of the IETF Trust's Legal Provisions
+     Relating to IETF Documents
+     (http://trustee.ietf.org/license-info).
+
+     This version of this YANG module is part of RFC XXXX; see
+     the RFC itself for full legal notices.";
+
+  revision 2019-11-18 {
+    description
+      "Initial revision.";
+    reference
+      "RFC XXXX: Stream Control Transmission Protocol (SCTP)
+                 Network Address Translation Support";
+  }
+
+  feature sctp-nat {
+    description
+      "This feature means that SCTP-specific variant of NAT
+       is supported. That is, avoid rewriting port numbers.";
+    reference
+      "Section 4.3 of RFC XXXX.";
+  }
+
+  augment "/nat:nat/nat:instances/nat:instance"
+        + "/nat:policy/nat:timers" {
+    when "/nat:nat/nat:instances/nat:instance"
+       + "/nat:policy/nat:transport-protocols"
+       + "/nat:protocol-id = 132";
+    description
+      "Extends NAT policy with a timeout for SCTP mapping
+       entries.";
+
+    leaf sctp-timeout {
+      type uint32;
+      units "seconds";
+      description
+        "SCTP inactivity timeout. That is, the time an SCTP
+         mapping entry will stay active without packets
+         traversing the NAT.";
+    }
+  }
+
+  augment "/nat:nat/nat:instances/nat:instance"
+        + "/nat:mapping-table/nat:mapping-entry" {
+    when "nat:transport-protocol = 132";
+    if-feature "sctp-nat";
+    description
+      "Extends the mapping entry with SCTP specifics.";
+
+    leaf int-VTag {
+       type uint32;
+       description
+         "The Internal Verification Tag that the internal
+          host has chosen for this communication.";
+    }
+    leaf rem-VTag {
+      type uint32;
+      description
+         "The Remote Verification Tag that the remote
+          peer has chosen for this communication.";
+    }
+  }
+}
+<CODE ENDS>
+]]>
+</sourcecode>
+</section>
 </section>
 
 <section>
@@ -1675,164 +1834,6 @@ NAT B  |  Int    |  Int   |   Rem    |   Rem  |    Int    |
 </section>
 
 <section>
-<name>SCTP NAT YANG Module</name>
-<t>This section defines a YANG module for SCTP NAT.</t>
-<t>The terminology for describing YANG data models is defined
-in <xref target="RFC7950" />.
-The meaning of the symbols in tree diagrams is defined
-in <xref target="RFC8340" />.</t>
-
-<section>
-<name>Tree Structure</name>
-<t>This module augments NAT YANG module <xref target="RFC8512" /> with
-SCTP specifics.
-The module supports both classical SCTP NAT (that is, rewrite port numbers)
-and SCTP-specific variant where the ports numbers are not altered.
-The YANG "feature" is used to indicate whether SCTP-specific variant is
-supported.</t>
-<t>The tree structure of the SCTP NAT YANG module is provided below:</t>
-<artwork>
-<![CDATA[
-module: ietf-nat-sctp
-  augment /nat:nat/nat:instances/nat:instance
-          /nat:policy/nat:timers:
-    +--rw sctp-timeout?   uint32
-  augment /nat:nat/nat:instances/nat:instance
-         /nat:mapping-table/nat:mapping-entry:
-    +--rw int-VTag?   uint32 {sctp-nat}?
-    +--rw rem-VTag?   uint32 {sctp-nat}?
-]]>
-</artwork>
-<t>Concretely, the SCTP NAT YANG module augments the NAT YANG module
-(policy, in particular) with the following:</t>
-<ul>
-<li><t>The sctp-timeout is used to control the SCTP inactivity timeout.
-That is, the time an SCTP mapping will stay active without SCTP packets
-traversing the NAT.
-This timeout can be set only for SCTP.
-Hence, "/nat:nat/nat:instances/nat:instance/nat:policy/nat:transport-protocols/nat:protocol-id"
-MUST be set to '132' (SCTP).</t></li>
-</ul>
-
-<t>In addition, the SCTP NAT YANG module augments the mapping entry
-with the following parameters defined in <xref target='terminology' />.
-These parameters apply only for SCTP NAT mapping entries (i.e.,
-"/nat/instances/instance/mapping-table/mapping-entry/transport-protocol"
-MUST be set to '132');</t>
-<ul>
-<li><t>The Internal Verification Tag (Int-VTag)</t></li>
-<li><t>The Remote Verification Tag (Rem-VTag)</t></li>
-</ul>
-</section>
-
-<section>
-<name>YANG Module</name>
-<sourcecode>
-<![CDATA[
-<CODE BEGINS> file "ietf-nat-sctp@2020-11-02.yang"
-module ietf-nat-sctp {
-  yang-version 1.1;
-  namespace "urn:ietf:params:xml:ns:yang:ietf-nat-sctp";
-  prefix nat-sctp;
-
-  import ietf-nat {
-    prefix nat;
-    reference
-      "RFC 8512: A YANG Module for Network Address Translation
-                 (NAT) and Network Prefix Translation (NPT)";
-  }
-
-  organization
-    "IETF TSVWG Working Group";
-  contact
-    "WG Web:   <https://datatracker.ietf.org/wg/tsvwg/>
-     WG List:  <mailto:tsvwg@ietf.org>
-
-     Author:  Mohamed Boucadair
-              <mailto:mohamed.boucadair@orange.com>";
-  description
-    "This module augments NAT YANG module with Stream Control
-     Transmission Protocol (SCTP) specifics. The extension supports
-     both a classical SCTP NAT (that is, rewrite port numbers)
-     and a, SCTP-specific variant where the ports numbers are
-     not altered.
-
-     Copyright (c) 2020 IETF Trust and the persons identified as
-     authors of the code.  All rights reserved.
-
-     Redistribution and use in source and binary forms, with or
-     without modification, is permitted pursuant to, and subject
-     to the license terms contained in, the Simplified BSD License
-     set forth in Section 4.c of the IETF Trust's Legal Provisions
-     Relating to IETF Documents
-     (http://trustee.ietf.org/license-info).
-
-     This version of this YANG module is part of RFC XXXX; see
-     the RFC itself for full legal notices.";
-
-  revision 2019-11-18 {
-    description
-      "Initial revision.";
-    reference
-      "RFC XXXX: Stream Control Transmission Protocol (SCTP)
-                 Network Address Translation Support";
-  }
-
-  feature sctp-nat {
-    description
-      "This feature means that SCTP-specific variant of NAT
-       is supported. That is, avoid rewriting port numbers.";
-    reference
-      "Section 4.3 of RFC XXXX.";
-  }
-
-  augment "/nat:nat/nat:instances/nat:instance"
-        + "/nat:policy/nat:timers" {
-    when "/nat:nat/nat:instances/nat:instance"
-       + "/nat:policy/nat:transport-protocols"
-       + "/nat:protocol-id = 132";
-    description
-      "Extends NAT policy with a timeout for SCTP mapping
-       entries.";
-
-    leaf sctp-timeout {
-      type uint32;
-      units "seconds";
-      description
-        "SCTP inactivity timeout. That is, the time an SCTP
-         mapping entry will stay active without packets
-         traversing the NAT.";
-    }
-  }
-
-  augment "/nat:nat/nat:instances/nat:instance"
-        + "/nat:mapping-table/nat:mapping-entry" {
-    when "nat:transport-protocol = 132";
-    if-feature "sctp-nat";
-    description
-      "Extends the mapping entry with SCTP specifics.";
-
-    leaf int-VTag {
-       type uint32;
-       description
-         "The Internal Verification Tag that the internal
-          host has chosen for this communication.";
-    }
-    leaf rem-VTag {
-      type uint32;
-      description
-         "The Remote Verification Tag that the remote
-          peer has chosen for this communication.";
-    }
-  }
-}
-<CODE ENDS>
-]]>
-</sourcecode>
-</section>
-</section>
-
-<section>
 <name>Socket API Considerations</name>
 <t>This section describes how the socket API defined in
 <xref target='RFC6458'/> is extended to provide a way for the
@@ -2046,12 +2047,7 @@ incoming SCTP packets.</t></li>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5061.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6020.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6096.xml"/>
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6241.xml"/>
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6242.xml"/>
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8040.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"/>
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8341.xml"/>
-<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8446.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8512.xml"/>
 </references>
 <references>
@@ -2065,6 +2061,8 @@ incoming SCTP packets.</t></li>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5508.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6056.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6146.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6241.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6242.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6269.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6333.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6458.xml"/>
@@ -2072,8 +2070,11 @@ incoming SCTP packets.</t></li>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6951.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7950.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7857.xml"/>
-
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8040.xml"/>
 <xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8340.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8341.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8446.xml"/>
+<xi:include href="https://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8900.xml"/>
 </references>
 <section numbered='false'>
 <name>Acknowledgments</name>
